@@ -1,5 +1,8 @@
 package com.androidrinomediarino.mediaplayerino;
 
+import android.content.DialogInterface;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.Manifest;
@@ -9,14 +12,15 @@ import android.media.MediaPlayer;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
+import android.widget.Toast;
+
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
-
 public class MainActivity extends AppCompatActivity {
 
     // Storage Permissions variables
-    private static final int    REQUEST_EXTERNAL_STORAGE = 1;
+    private static final int    REQUEST_CODE_EXTERNAL_STORAGE = 1;
     private int[]               PERMISSION_GRANT_RESULT;
     private static String[]     PERMISSIONS_STORAGE = {
             Manifest.permission.READ_EXTERNAL_STORAGE,
@@ -38,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
 
         //Permissions: MainActivity, AndroidManifest.xml
         requestStoragePermissions(this);
-        onRequestPermissionsResult(REQUEST_EXTERNAL_STORAGE, PERMISSIONS_STORAGE, PERMISSION_GRANT_RESULT);
+        onRequestPermissionsResult(REQUEST_CODE_EXTERNAL_STORAGE, PERMISSIONS_STORAGE, PERMISSION_GRANT_RESULT);
     }
 
     private void getMusic() {
@@ -49,9 +53,10 @@ public class MainActivity extends AppCompatActivity {
         musicList = musicDirPath.list(musicFilter);
 
         //Has Music?
-        if(musicList.length > 0) {
-            Log.d("Testerino", "No relevant files in Music Directory.");
+        if(musicList != null && musicList.length > 0) {
             hasMusic = true;
+        } else {
+            hasMusic = false;
         }
     }
 
@@ -94,7 +99,24 @@ public class MainActivity extends AppCompatActivity {
     };
 
     // Grant Permission
-    private void requestStoragePermissions(Activity activity) {
+    private void requestStoragePermissions(final Activity activity) {
+
+        final boolean requestPermissionRational = ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE);
+        if(!requestPermissionRational) {
+            showMessageOKCancel("You need to allow access to Music Storage",
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            // We don't have permission so prompt the user
+                            ActivityCompat.requestPermissions(
+                                    activity,
+                                    PERMISSIONS_STORAGE,
+                                    REQUEST_CODE_EXTERNAL_STORAGE
+                            );
+                        }
+                    });
+        }
+
 
         PERMISSION_GRANT_RESULT = new int[] {
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE),
@@ -108,19 +130,26 @@ public class MainActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(
                     activity,
                     PERMISSIONS_STORAGE,
-                    REQUEST_EXTERNAL_STORAGE
+                    REQUEST_CODE_EXTERNAL_STORAGE
             );
         }
+    }
+
+    private void showMessageOKCancel(String message, DialogInterface.OnClickListener okListener) {
+        new AlertDialog.Builder(MainActivity.this)
+                .setMessage(message)
+                .setPositiveButton("OK", okListener)
+                .setNegativeButton("Cancel", null)
+                .create()
+                .show();
     }
 
     // Verify Permission Granted
     @Override
     public void onRequestPermissionsResult(final int requestCode, final String permissions[], final int[] grantResults) {
 
-        ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_CONTACTS);
-
         switch (requestCode) {
-            case REQUEST_EXTERNAL_STORAGE: {
+            case REQUEST_CODE_EXTERNAL_STORAGE: {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
@@ -131,6 +160,7 @@ public class MainActivity extends AppCompatActivity {
 
                 } else {
                     // Permission Denied
+                    Toast.makeText(MainActivity.this, "READ_WRITE Denied", Toast.LENGTH_SHORT).show();
                 }
 
             } break;
