@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
 
             try {
                 mediaPlayer.setDataSource(file.getAbsolutePath());
-                mediaPlayer.prepare();                                  //Android requires prepare() before play, calls PreparedListener
+                mediaPlayer.prepare();                                  //Android requires prepare() before play, calls setOnPreparedListener
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -101,30 +101,30 @@ public class MainActivity extends AppCompatActivity {
     // Grant Permission
     private void requestStoragePermissions(final Activity activity) {
 
-        final boolean requestPermissionRational = ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE);
-        if(!requestPermissionRational) {
-            showMessageOKCancel("You need to allow access to Music Storage",
-                    new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            // We don't have permission so prompt the user
-                            ActivityCompat.requestPermissions(
-                                    activity,
-                                    PERMISSIONS_STORAGE,
-                                    REQUEST_CODE_EXTERNAL_STORAGE
-                            );
-                        }
-                    });
-        }
-
 
         PERMISSION_GRANT_RESULT = new int[] {
-                ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE),
-                ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE),
+                ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
         };
 
         if (    PERMISSION_GRANT_RESULT[0] != PackageManager.PERMISSION_GRANTED ||  // Read
                 PERMISSION_GRANT_RESULT[1] != PackageManager.PERMISSION_GRANTED) {  // Write
+
+            final boolean requestPermissionRational = ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE);
+            if(!requestPermissionRational) {
+                showMessageOKCancel("You need to allow access to Music Storage",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                // We don't have permission so prompt the user
+                                ActivityCompat.requestPermissions(
+                                        activity,
+                                        PERMISSIONS_STORAGE,
+                                        REQUEST_CODE_EXTERNAL_STORAGE
+                                );
+                            }
+                        });
+            }
 
             // We don't have permission so prompt the user
             ActivityCompat.requestPermissions(
@@ -154,8 +154,8 @@ public class MainActivity extends AppCompatActivity {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
                     // Permission Granted
+                    // Permission dependent code is ready to run
                     getMusic();
-
                     playMusic();
 
                 } else {
