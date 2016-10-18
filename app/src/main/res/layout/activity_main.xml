@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_main"
@@ -12,25 +12,14 @@
     android:orientation="vertical"
     tools:context="com.androidrinomediarino.mediaplayerino.MainActivity">
 
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/fragment_container">
-
-    </FrameLayout>
-
-    <SeekBar
-        style="@style/Widget.AppCompat.SeekBar.Discrete"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:max="10"
-        android:progress="3"
-        android:id="@+id/seekBar4" />
 
     <LinearLayout
+        android:id="@+id/media_button_group"
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="125dp">
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        >
 
         <ImageButton
             android:layout_width="wrap_content"
@@ -53,4 +42,24 @@
             android:id="@+id/btn_next"
             android:layout_weight="1" />
     </LinearLayout>
-</LinearLayout>
+
+    <SeekBar
+        style="@android:style/Widget.DeviceDefault.SeekBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:max="10"
+        android:progress="3"
+        android:id="@+id/seekBar"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:layout_weight="1"
+        android:layout_above="@id/media_button_group"
+        />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/fragment_container"
+        android:layout_above="@id/seekBar"
+        />
+</RelativeLayout>
