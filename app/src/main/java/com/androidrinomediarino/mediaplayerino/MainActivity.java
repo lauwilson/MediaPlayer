@@ -1,6 +1,8 @@
 package com.androidrinomediarino.mediaplayerino;
 
 import android.content.DialogInterface;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -12,12 +14,14 @@ import android.media.MediaPlayer;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements SongMetadataFragment.OnFragmentInteractionListener,
+                                                                CurrentPlaylistFragment.OnFragmentInteractionListener {
 
     // Storage Permissions variables
     private static final int    REQUEST_CODE_EXTERNAL_STORAGE = 1;
@@ -39,6 +43,38 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        if (findViewById(R.id.fragment_container) != null) {
+            if (savedInstanceState != null) {
+                return;
+            }
+        }
+
+        // Initialize the starting fragment
+        CurrentPlaylistFragment initialFragment = new CurrentPlaylistFragment();
+        getSupportFragmentManager()
+                .beginTransaction()
+                .add(R.id.fragment_container, initialFragment, "CURRENT_PLAYLIST")
+                .commit();
+
+        findViewById(R.id.btn_previous).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(final View view) {
+                // TODO: Insert onclick logic for the previous button.
+            }
+        });
+        findViewById(R.id.btn_play).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(final View view) {
+                // TODO: Insert onclick logic for the play button.
+            }
+        });
+        findViewById(R.id.btn_next).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(final View view) {
+                // TODO: Insert onclick logic for the next button.
+            }
+        });
 
         //Permissions: MainActivity, AndroidManifest.xml
         requestStoragePermissions(this);
@@ -167,6 +203,19 @@ public class MainActivity extends AppCompatActivity {
 
             default:
                 super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+    }
+
+    /**
+     * Implementation of OnFragmentInteraction interface method.
+     */
+    public void btn_fragmentSwitch_onClick() {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        Fragment playlistFragment = fragmentManager.findFragmentByTag("CURRENT_PLAYLIST");
+        if (playlistFragment != null && playlistFragment.isVisible()) {
+            fragmentManager.beginTransaction().replace(R.id.fragment_container, new SongMetadataFragment(), "SONG_METADATA").commit();
+        } else {
+            fragmentManager.beginTransaction().replace(R.id.fragment_container, new CurrentPlaylistFragment(), "CURRENT_PLAYLIST").commit();
         }
     }
 }
