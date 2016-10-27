@@ -20,6 +20,9 @@ import android.widget.Toast;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+
 public class MainActivity extends AppCompatActivity implements SongMetadataFragment.OnFragmentInteractionListener,
                                                                 CurrentPlaylistFragment.OnFragmentInteractionListener {
 
@@ -36,7 +39,7 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
     private boolean             hasMusic = false;
     private final MediaPlayer   mediaPlayer = new MediaPlayer();
     private File                musicDirPath;
-    private String[]            musicList;
+    private ArrayList<String>   musicList;
     private File                file;
 
     @Override
@@ -86,10 +89,10 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
         musicDirPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC);
 
         //Array of song paths
-        musicList = musicDirPath.list(musicFilter);
+        musicList = new ArrayList<>(Arrays.asList(musicDirPath.list(musicFilter)));
 
         //Has Music?
-        if(musicList != null && musicList.length > 0) {
+        if(musicList != null && musicList.size() > 0) {
             hasMusic = true;
         } else {
             hasMusic = false;
@@ -106,7 +109,7 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
 
         //Play Music
         if(hasMusic) {
-            file = new File(musicDirPath, musicList[0]);                //The music to play
+            file = new File(musicDirPath, musicList.get(0));                //The music to play
 
             try {
                 mediaPlayer.setDataSource(file.getAbsolutePath());
@@ -137,17 +140,33 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
     // Grant Permission
     private void requestStoragePermissions(final Activity activity) {
 
-
         PERMISSION_GRANT_RESULT = new int[] {
                 ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE),
                 ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
         };
 
-        if (    PERMISSION_GRANT_RESULT[0] != PackageManager.PERMISSION_GRANTED ||  // Read
-                PERMISSION_GRANT_RESULT[1] != PackageManager.PERMISSION_GRANTED) {  // Write
+        if (PERMISSION_GRANT_RESULT[0] != PackageManager.PERMISSION_GRANTED ||  // Read
+            PERMISSION_GRANT_RESULT[1] != PackageManager.PERMISSION_GRANTED) {  // Write
 
             final boolean requestPermissionRational = ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE);
-            if(!requestPermissionRational) {
+            if(requestPermissionRational) {
+
+                showMessageOKCancel("You need to allow access to Music Storage",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                // We don't have permission so prompt the user
+                                ActivityCompat.requestPermissions(
+                                        activity,
+                                        PERMISSIONS_STORAGE,
+                                        REQUEST_CODE_EXTERNAL_STORAGE
+                                );
+                            }
+                        });
+                return;
+
+            } else {
+
                 showMessageOKCancel("You need to allow access to Music Storage",
                         new DialogInterface.OnClickListener() {
                             @Override
@@ -161,13 +180,6 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
                             }
                         });
             }
-
-            // We don't have permission so prompt the user
-            ActivityCompat.requestPermissions(
-                    activity,
-                    PERMISSIONS_STORAGE,
-                    REQUEST_CODE_EXTERNAL_STORAGE
-            );
         }
     }
 
