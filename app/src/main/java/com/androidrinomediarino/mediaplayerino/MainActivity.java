@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
     private boolean             hasMusic = false;
     private final MediaPlayer   mediaPlayer = new MediaPlayer();
     private File                musicDirPath;
-    private ArrayList<String>   musicList;
+    private ArrayList<File>     musicList;
     private File                file;
 
     @Override
@@ -84,12 +84,18 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
         onRequestPermissionsResult(REQUEST_CODE_EXTERNAL_STORAGE, PERMISSIONS_STORAGE, PERMISSION_GRANT_RESULT);
     }
 
+    // TODO: Move getMusic to Scanner
     private void getMusic() {
         //Access MUSIC directory
         musicDirPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC);
 
+        //TEST musicScanner
+        MusicScanner musicScanner = new MusicScanner(musicDirPath);
+
         //Array of song paths
-        musicList = new ArrayList<>(Arrays.asList(musicDirPath.list(musicFilter)));
+        musicList = musicScanner.getMusicFiles();
+        //ArrayList<String>
+        //musicList = new ArrayList<>(Arrays.asList(musicDirPath.list(musicFilter)));
 
         //Has Music?
         if(musicList != null && musicList.size() > 0) {
@@ -109,7 +115,7 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
 
         //Play Music
         if(hasMusic) {
-            file = new File(musicDirPath, musicList.get(0));                //The music to play
+            file = musicList.get(0);                                    //The music to play
 
             try {
                 mediaPlayer.setDataSource(file.getAbsolutePath());
@@ -120,8 +126,8 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
         }
     }
 
-
     // Filter Files by Extension
+    /*
     private FilenameFilter musicFilter = new FilenameFilter() {
         @Override
         public boolean accept(File dir, String fileName) {
@@ -133,9 +139,11 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
                 return true;
             }
             file = new File(dir.getAbsolutePath()+"/"+fileName);
+
             return file.isDirectory();
         }
     };
+    */
 
     // Grant Permission
     private void requestStoragePermissions(final Activity activity) {
