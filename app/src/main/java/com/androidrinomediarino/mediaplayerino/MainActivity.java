@@ -11,17 +11,11 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
-import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
-
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity implements SongMetadataFragment.OnFragmentInteractionListener,
                                                                 CurrentPlaylistFragment.OnFragmentInteractionListener {
@@ -34,13 +28,8 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
             Manifest.permission.WRITE_EXTERNAL_STORAGE
     };
 
-
     // MediaPlayer
-    private boolean             hasMusic = false;
     private final MediaPlayer   mediaPlayer = new MediaPlayer();
-    private File                musicDirPath;
-    private ArrayList<File>     musicList;
-    private File                file;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,28 +73,10 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
         onRequestPermissionsResult(REQUEST_CODE_EXTERNAL_STORAGE, PERMISSIONS_STORAGE, PERMISSION_GRANT_RESULT);
     }
 
-    // TODO: Move getMusic to Scanner
-    private void getMusic() {
-        //Access MUSIC directory
-        musicDirPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC);
-
-        //TEST musicScanner
-        MusicScanner musicScanner = new MusicScanner(musicDirPath);
-
-        //Array of song paths
-        musicList = musicScanner.getMusicFiles();
-        //ArrayList<String>
-        //musicList = new ArrayList<>(Arrays.asList(musicDirPath.list(musicFilter)));
-
-        //Has Music?
-        if(musicList != null && musicList.size() > 0) {
-            hasMusic = true;
-        } else {
-            hasMusic = false;
-        }
-    }
-
     private void playMusic() {
+        //Scan music
+        MusicScanner musicScanner = new MusicScanner();
+
         //Verify prepare
         mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             public void onPrepared(MediaPlayer mp) {
@@ -114,8 +85,10 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
         });
 
         //Play Music
-        if(hasMusic) {
-            file = musicList.get(0);                                    //The music to play
+        if(musicScanner.hasMusic()) {
+
+            // Get a specific song
+            File file = musicScanner.getMusicFiles().get(3);
 
             try {
                 mediaPlayer.setDataSource(file.getAbsolutePath());
@@ -125,25 +98,6 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
             }
         }
     }
-
-    // Filter Files by Extension
-    /*
-    private FilenameFilter musicFilter = new FilenameFilter() {
-        @Override
-        public boolean accept(File dir, String fileName) {
-            File file;
-
-            if(     fileName.endsWith(".mp3")   ||
-                    fileName.endsWith(".flac")  ||
-                    fileName.endsWith(".wav")   ){
-                return true;
-            }
-            file = new File(dir.getAbsolutePath()+"/"+fileName);
-
-            return file.isDirectory();
-        }
-    };
-    */
 
     // Grant Permission
     private void requestStoragePermissions(final Activity activity) {
@@ -211,7 +165,6 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
 
                     // Permission Granted
                     // Permission dependent code is ready to run
-                    getMusic();
                     playMusic();
 
                 } else {
