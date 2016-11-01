@@ -89,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
         if(musicScanner.hasMusic()) {
 
             // Get a specific song
-            File file = musicScanner.getMusicFiles().get(0);
+            File file = musicScanner.getMusicFiles().get(3);
 
             try {
                 filePath = file.getAbsolutePath();
