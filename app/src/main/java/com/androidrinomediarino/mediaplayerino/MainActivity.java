@@ -27,6 +27,7 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE
     };
+    private String filePath;
 
     // MediaPlayer
     private final MediaPlayer   mediaPlayer = new MediaPlayer();
@@ -91,8 +92,8 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
             File file = musicScanner.getMusicFiles().get(0);
 
             try {
-                mediaPlayer.setDataSource(file.getAbsolutePath());
-                MetaData.GetSongMetaData(this, file.getAbsolutePath(), null);
+                filePath = file.getAbsolutePath();
+                mediaPlayer.setDataSource(filePath);
                 mediaPlayer.prepare();                                  //Android requires prepare() before play, calls setOnPreparedListener
             } catch (IOException e) {
                 e.printStackTrace();
@@ -186,8 +187,13 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
     public void btn_fragmentSwitch_onClick() {
         FragmentManager fragmentManager = getSupportFragmentManager();
         Fragment playlistFragment = fragmentManager.findFragmentByTag("CURRENT_PLAYLIST");
+
         if (playlistFragment != null && playlistFragment.isVisible()) {
-            fragmentManager.beginTransaction().replace(R.id.fragment_container, new SongMetadataFragment(), "SONG_METADATA").commit();
+            Fragment songMetaDataFragment = new SongMetadataFragment();
+            Bundle bundle = new Bundle();
+            bundle.putString("filePath", filePath);
+            songMetaDataFragment.setArguments(bundle);
+            fragmentManager.beginTransaction().replace(R.id.fragment_container, songMetaDataFragment, "SONG_METADATA").commit();
         } else {
             fragmentManager.beginTransaction().replace(R.id.fragment_container, new CurrentPlaylistFragment(), "CURRENT_PLAYLIST").commit();
         }
