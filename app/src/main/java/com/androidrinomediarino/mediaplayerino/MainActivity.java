@@ -88,10 +88,11 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
         if(musicScanner.hasMusic()) {
 
             // Get a specific song
-            File file = musicScanner.getMusicFiles().get(3);
+            File file = musicScanner.getMusicFiles().get(0);
 
             try {
                 mediaPlayer.setDataSource(file.getAbsolutePath());
+                MetaData.GetSongMetaData(this, file.getAbsolutePath(), null);
                 mediaPlayer.prepare();                                  //Android requires prepare() before play, calls setOnPreparedListener
             } catch (IOException e) {
                 e.printStackTrace();
