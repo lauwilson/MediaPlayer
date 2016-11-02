@@ -1,12 +1,17 @@
 package com.androidrinomediarino.mediaplayerino;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 
 /**
@@ -62,7 +67,37 @@ public class SongMetadataFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_song_metadata, container, false);
+        View view = inflater.inflate(R.layout.fragment_song_metadata, container, false);
+
+        Bundle arguments = this.getArguments();
+        if (arguments != null){
+            ImageView coverImage = (ImageView) view.findViewById(R.id.imageView);
+            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+            TextView songInfo;
+
+            retriever.setDataSource(arguments.getString("filePath"));
+
+            byte[] coverArtBytes =  retriever.getEmbeddedPicture();
+            if(coverArtBytes!=null)
+            {
+                Bitmap bitmap = BitmapFactory.
+                        decodeByteArray(coverArtBytes, 0, coverArtBytes.length);
+                coverImage.setImageBitmap(bitmap);
+            }
+            else
+            {
+                coverImage.setImageDrawable(coverImage.getResources().
+                        getDrawable(R.drawable.default_album_art));
+            }
+
+            songInfo = (TextView)view.findViewById(R.id.textView);
+            String songName = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+            String artistName = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+
+            songInfo.setText(songName + " - " + artistName);
+        }
+
+        return view;
     }
 
     @Override

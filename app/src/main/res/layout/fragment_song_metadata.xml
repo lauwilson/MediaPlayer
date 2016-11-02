@@ -11,17 +11,19 @@
         android:orientation="vertical">
 
 
+        <TextView
+            android:text="TextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:textSize="18dp"
+            android:id="@+id/textView" />
+
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:srcCompat="@android:drawable/dialog_holo_dark_frame"
             android:id="@+id/imageView" />
-
-        <TextView
-            android:text="TextView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/textView" />
     </LinearLayout>
     <Button
         android:text="Show Playlist"
