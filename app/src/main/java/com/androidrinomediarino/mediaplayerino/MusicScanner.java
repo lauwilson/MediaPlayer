@@ -10,7 +10,7 @@ public class MusicScanner {
     private File                musicDirPath;
     private ArrayList<File>     musicFiles;
 
-    public MusicScanner() {
+    protected MusicScanner() {
 
         // Init ArrayList
         musicFiles = new ArrayList<>();
