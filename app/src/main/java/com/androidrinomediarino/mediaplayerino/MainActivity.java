@@ -1,6 +1,11 @@
 package com.androidrinomediarino.mediaplayerino;
 
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
@@ -11,9 +16,9 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.support.v4.app.ActivityCompat;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
-
 import java.io.File;
 import java.util.ArrayList;
 
@@ -32,8 +37,45 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
     private MusicScanner        musicScanner;
     private ArrayList<File>     musicFiles;
 
-    //MusicPlayer
+    //MusicPlayer Service
     private MusicPlayer         musicPlayer;
+    private Intent              musicIntent;
+    protected boolean           musicBound = false;
+
+    //Connect to MusicPlayer Service
+    private ServiceConnection musicPlayerConnection = new ServiceConnection() {
+        @Override
+        public synchronized void onServiceConnected(ComponentName name, IBinder service) {
+            MusicPlayer.MusicBinder binder = (MusicPlayer.MusicBinder)service;
+            //get service
+            musicPlayer = binder.getService();
+            musicBound = true;
+            // TODO: THIS TASK IS ASYNC
+            playMusic();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            musicBound = false;
+        }
+    };
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if(musicIntent==null){
+            musicIntent = new Intent(this, MusicPlayer.class);
+            bindService(musicIntent, musicPlayerConnection, Context.BIND_AUTO_CREATE);
+            startService(musicIntent);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        stopService(musicIntent);
+        musicPlayer = null;
+        super.onDestroy();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -144,9 +186,9 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
 
                     //Get list of music files
                     musicScanner = new MusicScanner();
-
-                    //Post files to MediaPlayer
-                    musicPlayer = new MusicPlayer(musicScanner);
+                    musicFiles = musicScanner.getMusicFiles();
+                    // TODO: THIS TASK IS ASYNC
+                    playMusic();
 
                 } else {
                     // Permission Denied
@@ -157,6 +199,17 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
 
             default:
                 super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+    }
+
+    // TODO ASYNC TASKS IS FUNNELED HERE
+    // MusicPlayer & musicList ready
+    private void playMusic() {
+        if(musicPlayer != null && musicFiles != null) {
+            //pass list
+            musicPlayer.setList(musicFiles);
+            Log.i("X", "Service is bonded successfully!");
+            musicPlayer.cycle();
         }
     }
 
