@@ -10,6 +10,8 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import java.util.List;
+
 
 /**
  * Note:
@@ -25,6 +27,8 @@ public class CurrentPlaylistFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
+    private MusicScanner scanner = new MusicScanner();
 
     private OnFragmentInteractionListener mListener;
 
@@ -72,7 +76,7 @@ public class CurrentPlaylistFragment extends Fragment {
 
         // PLACEHOLDER: Static Playlist List
         // TODO Wilson: Replace static list with generated information
-        final String[] songList = {"Song 1", "Song 2", "Song 3"};
+        final List<String> songList = scanner.GetSongArtist();
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity().getApplicationContext(), R.layout.songlist_listview_item_layout, songList);
 
         ListView playlist = (ListView) view.findViewById(R.id.listView_playlist);
