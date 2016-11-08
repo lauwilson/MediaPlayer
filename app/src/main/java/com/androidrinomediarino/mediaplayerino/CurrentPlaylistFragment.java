@@ -27,7 +27,7 @@ public class CurrentPlaylistFragment extends Fragment {
     private String mParam1;
     private String mParam2;
 
-    private MusicScanner scanner = new MusicScanner();
+    private MusicScanner scanner = MusicScanner.getInstance();
 
     private OnFragmentInteractionListener mListener;
 

@@ -6,24 +6,35 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 public class MusicScanner {
 
+    private static MusicScanner     instance = new MusicScanner();
     private File                    musicDirPath;
     private ArrayList<File>         musicFiles;
     private List<File>              sortedMusicFiles;
     private MediaMetadataRetriever  retriever = new MediaMetadataRetriever();
+    private Map<String, ArrayList<File>>    _songsByArtist;
 
-    protected MusicScanner() {
+    private MusicScanner() {
 
         // Init ArrayList
         musicFiles = new ArrayList<>();
+        _songsByArtist = new HashMap<String, ArrayList<File>>();
 
         // Access MUSIC directory
         musicDirPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC);
 
         // Scan for music; musicFiles lists all music
         scanMusic(musicDirPath);
+        String a = "";
+    }
+
+    // Thread-safe singleton
+    public static MusicScanner getInstance() {
+        return instance;
     }
 
     // Get music files & get music files by folder
@@ -43,8 +54,19 @@ public class MusicScanner {
                        f.getName().endsWith(".wav"))
             {
                 musicFiles.add(f);
+                addToDefaultPlaylists(f);
             }
         }
+    }
+
+    private void addToDefaultPlaylists(File file) {
+        retriever.setDataSource(file.getAbsolutePath());
+        String artist = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+        artist = (artist == null) ? "Unknown Artist" : artist;
+        if (!_songsByArtist.containsKey(artist)) {
+            _songsByArtist.put(artist, new ArrayList<File>());
+        }
+        _songsByArtist.get(artist).add(file);
     }
 
     // Check if musicFiles is NULL or EMPTY
@@ -92,6 +114,10 @@ public class MusicScanner {
         }
 
         return songs;
+    }
+
+    public Map<String, ArrayList<File>> getSongsByArtist() {
+        return _songsByArtist;
     }
 
     public final List<File> SortFiles() {
