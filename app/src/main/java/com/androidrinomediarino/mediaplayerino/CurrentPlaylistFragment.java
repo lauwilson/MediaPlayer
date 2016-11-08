@@ -1,7 +1,6 @@
 package com.androidrinomediarino.mediaplayerino;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -74,9 +73,7 @@ public class CurrentPlaylistFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // PLACEHOLDER: Static Playlist List
-        // TODO Wilson: Replace static list with generated information
-        final List<String> songList = scanner.GetSongArtist();
+        final List<String> songList = scanner.GetSongNameAndArtist();
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity().getApplicationContext(), R.layout.songlist_listview_item_layout, songList);
 
         ListView playlist = (ListView) view.findViewById(R.id.listView_playlist);

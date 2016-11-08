@@ -11,6 +11,7 @@ public class MusicScanner {
 
     private File                    musicDirPath;
     private ArrayList<File>         musicFiles;
+    private List<File>              sortedMusicFiles;
     private MediaMetadataRetriever  retriever = new MediaMetadataRetriever();
 
     protected MusicScanner() {
@@ -60,14 +61,24 @@ public class MusicScanner {
         return musicFiles;
     }
 
-    public List<String> GetSongArtist() {
+    public List<String> GetSongNameAndArtist() {
         List<String> songs = new ArrayList<>();
 
-        for (File file : musicFiles) {
+        sortedMusicFiles = SortFiles();
+
+        for (File file : sortedMusicFiles) {
             try {
                 retriever.setDataSource(file.getAbsolutePath());
                 String songName =   retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+                if (songName == null) {
+                    songName = "";
+                }
+
                 String songArtist = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+                if (songArtist == null) {
+                    songArtist = "";
+                }
+
                 songs.add(songName + " - " + songArtist);
 
             } catch (Exception ex) {
@@ -81,6 +92,12 @@ public class MusicScanner {
         }
 
         return songs;
+    }
+
+    public final List<File> SortFiles() {
+        List<File> sortedFiles = new ArrayList<>();
+        sortedFiles = Sort.SortByArtist(musicFiles, Sort.sortOrder.ASC);
+        return sortedFiles;
     }
 
 }
