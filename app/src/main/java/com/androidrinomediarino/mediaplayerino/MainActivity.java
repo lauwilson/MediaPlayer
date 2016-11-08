@@ -17,6 +17,9 @@ import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 import java.io.File;
@@ -119,6 +122,14 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
         onRequestPermissionsResult(REQUEST_CODE_EXTERNAL_STORAGE, PERMISSIONS_STORAGE, PERMISSION_GRANT_RESULT);
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main, menu);
+        return true;
+    }
+
+
     // Grant Permission
     private void requestStoragePermissions(final Activity activity) {
 
@@ -185,7 +196,7 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
                     // Permission Granted: dependent code is ready to run
 
                     //Get list of music files
-                    musicScanner = new MusicScanner();
+                    musicScanner = MusicScanner.getInstance();
                     musicFiles = musicScanner.getMusicFiles();
                     // TODO: THIS TASK IS ASYNC
                     playMusic();
@@ -229,5 +240,10 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
         } else {
             fragmentManager.beginTransaction().replace(R.id.fragment_container, new CurrentPlaylistFragment(), "CURRENT_PLAYLIST").commit();
         }
+    }
+
+    protected void menu_addSongs_onClick(MenuItem menuItem) {
+        Intent intent = new Intent(getApplicationContext(), AddSongActivity.class);
+        startActivity(intent);
     }
 }
