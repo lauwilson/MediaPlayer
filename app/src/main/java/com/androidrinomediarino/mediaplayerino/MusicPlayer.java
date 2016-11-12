@@ -11,6 +11,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import java.io.File;
 import java.io.IOException;
@@ -73,8 +74,13 @@ public class MusicPlayer extends Service implements
     // When service instance is unbound; executes when user exits the app
     @Override
     public boolean onUnbind(Intent intent){
-        mediaPlayer.stop();
-        mediaPlayer.release();
+        if(mediaPlayer!=null) {
+            if(mediaPlayer.isPlaying())
+                mediaPlayer.stop();
+            mediaPlayer.reset();
+            mediaPlayer.release();
+            mediaPlayer=null;
+        }
         return false;
     }
 
