@@ -91,8 +91,16 @@ public class SongMetadataFragment extends Fragment {
             }
 
             songInfo = (TextView)view.findViewById(R.id.textView);
+
             String songName = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+            if (songName == null) {
+                songName = "";
+            }
+
             String artistName = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+            if (artistName == null) {
+                artistName = "";
+            }
 
             songInfo.setText(songName + " - " + artistName);
         }

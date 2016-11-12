@@ -17,6 +17,9 @@ import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 import java.io.File;
@@ -50,8 +53,8 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
             //get service
             musicPlayer = binder.getService();
             musicBound = true;
-            // TODO: THIS TASK IS ASYNC
-            playMusic();
+            // TODO: ASYNC
+            run();
         }
 
         @Override
@@ -63,6 +66,7 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
     @Override
     protected void onStart() {
         super.onStart();
+
         if(musicIntent==null){
             musicIntent = new Intent(this, MusicPlayer.class);
             bindService(musicIntent, musicPlayerConnection, Context.BIND_AUTO_CREATE);
@@ -72,9 +76,14 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
 
     @Override
     protected void onDestroy() {
+        super.onDestroy();
+
         stopService(musicIntent);
         musicPlayer = null;
-        super.onDestroy();
+
+        if (musicPlayerConnection != null) {
+            unbindService(musicPlayerConnection);
+        }
     }
 
     @Override
@@ -88,35 +97,16 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
             }
         }
 
-        // Initialize the starting fragment
-        CurrentPlaylistFragment initialFragment = new CurrentPlaylistFragment();
-        getSupportFragmentManager()
-                .beginTransaction()
-                .add(R.id.fragment_container, initialFragment, "CURRENT_PLAYLIST")
-                .commit();
-
-        findViewById(R.id.btn_previous).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(final View view) {
-                // TODO: Insert onclick logic for the previous button.
-            }
-        });
-        findViewById(R.id.btn_play).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(final View view) {
-                // TODO: Insert onclick logic for the play button.
-            }
-        });
-        findViewById(R.id.btn_next).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(final View view) {
-                // TODO: Insert onclick logic for the next button.
-            }
-        });
-
         //Permissions: MainActivity, AndroidManifest.xml
         requestStoragePermissions(this);
         onRequestPermissionsResult(REQUEST_CODE_EXTERNAL_STORAGE, PERMISSIONS_STORAGE, PERMISSION_GRANT_RESULT);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main, menu);
+        return true;
     }
 
     // Grant Permission
@@ -185,10 +175,11 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
                     // Permission Granted: dependent code is ready to run
 
                     //Get list of music files
-                    musicScanner = new MusicScanner();
+                    musicScanner = MusicScanner.getInstance();
                     musicFiles = musicScanner.getMusicFiles();
-                    // TODO: THIS TASK IS ASYNC
-                    playMusic();
+
+                    // TODO: ASYNC
+                    run();
 
                 } else {
                     // Permission Denied
@@ -202,13 +193,45 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
         }
     }
 
-    // TODO ASYNC TASKS IS FUNNELED HERE
+    // TODO: ASYNC tasks are funneled here
     // MusicPlayer & musicList ready
-    private void playMusic() {
+    private void run() {
+
         if(musicPlayer != null && musicFiles != null) {
-            //pass list
-            musicPlayer.setList(musicFiles);
+
             Log.i("X", "Service is bonded successfully!");
+
+            // Pass list of music files to MusicPlayer
+            musicPlayer.setList(musicFiles);
+
+            // Initialize the starting fragment
+            CurrentPlaylistFragment initialFragment = new CurrentPlaylistFragment();
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .add(R.id.fragment_container, initialFragment, "CURRENT_PLAYLIST")
+                    //.commit();
+                    .commitAllowingStateLoss();
+
+            findViewById(R.id.btn_previous).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(final View view) {
+                    // TODO: Insert onclick logic for the previous button.
+                }
+            });
+            findViewById(R.id.btn_play).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(final View view) {
+                    // TODO: Insert onclick logic for the play button.
+                }
+            });
+            findViewById(R.id.btn_next).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(final View view) {
+                    // TODO: Insert onclick logic for the next button.
+                }
+            });
+
+            // TODO: Placeholder auto play all music
             musicPlayer.cycle();
         }
     }
@@ -229,5 +252,10 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
         } else {
             fragmentManager.beginTransaction().replace(R.id.fragment_container, new CurrentPlaylistFragment(), "CURRENT_PLAYLIST").commit();
         }
+    }
+
+    public void menu_addSongs_onClick(MenuItem menuItem) {
+        Intent intent = new Intent(getApplicationContext(), AddSongActivity.class);
+        startActivity(intent);
     }
 }

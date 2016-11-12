@@ -1,7 +1,6 @@
 package com.androidrinomediarino.mediaplayerino;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -9,6 +8,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+
+import java.util.List;
 
 
 /**
@@ -25,6 +26,8 @@ public class CurrentPlaylistFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
+    private MusicScanner scanner = MusicScanner.getInstance();
 
     private OnFragmentInteractionListener mListener;
 
@@ -70,9 +73,7 @@ public class CurrentPlaylistFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // PLACEHOLDER: Static Playlist List
-        // TODO Wilson: Replace static list with generated information
-        final String[] songList = {"Song 1", "Song 2", "Song 3"};
+        final List<String> songList = scanner.GetSongNameAndArtist();
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity().getApplicationContext(), R.layout.songlist_listview_item_layout, songList);
 
         ListView playlist = (ListView) view.findViewById(R.id.listView_playlist);
