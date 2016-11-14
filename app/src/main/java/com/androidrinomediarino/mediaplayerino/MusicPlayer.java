@@ -27,36 +27,82 @@ public class MusicPlayer extends Service implements
     private String              filePath;
     private int                 cycleCounter = 0;
     private ArrayList<File>     musicList;
-    private final IBinder       musicBind = new MusicBinder();
+    private final IBinder       musicBind = new MusicBinder();      // interface for clients that bind
+    private int                 mStartMode;                         // indicates how to behave if the service is killed
+    private boolean             mAllowRebind;                       // indicates whether onRebind should be used
 
-    // The system invokes this method to perform one-time setup procedures
-    // when the service is initially created
-    // (before it calls either onStartCommand() or onBind())
     @Override
     public void onCreate() {
-        //create the service
+        Log.i("@MusicPlayer", "onCreate() is called!");
+        // The service is being created
         super.onCreate();
-
-        // Create MediaPlayer
-        mediaPlayer = new MediaPlayer();
-
-        // Init EventListeners
-        mediaPlayer.setOnCompletionListener(this);
-        mediaPlayer.setOnPreparedListener(this);
-        mediaPlayer.setOnErrorListener(this);
-
-        //Set MediaPlayer properties
         initMediaPlayer();
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.i("@MusicPlayer", "onStartCommand() is called!");
+        // The service is starting, due to a call to startService()
+        return START_STICKY;
+        //return mStartMode;
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        Log.i("@MusicPlayer", "onBind() is called!");
+        // A client is binding to the service with bindService()
+        return musicBind;
+    }
+
+    @Override
+    public boolean onUnbind(Intent intent) {
+        Log.i("@MusicPlayer", "onUnbind() is called!");
+        // All clients have unbound with unbindService()
+        return false;
+        //return mAllowRebind;
+    }
+
+    @Override
+    public void onRebind(Intent intent) {
+        Log.i("@MusicPlayer", "onRebind() is called!");
+        // A client is binding to the service with bindService(),
+    }
+
+    @Override
+    public void onDestroy() {
+        Log.i("@MusicPlayer", "onDestroy() is called!");
+        // The service is no longer used and is being destroyed
+        super.onDestroy();
+
+        stopSelf();
+
+        if(mediaPlayer != null) {
+            if(mediaPlayer.isPlaying()) {
+                mediaPlayer.stop();
+            }
+            mediaPlayer.reset();
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
     }
 
     //Set MediaPlayer properties
     private void initMediaPlayer(){
+        // Create MediaPlayer
+        mediaPlayer = new MediaPlayer();
+
+        // Init
+        mediaPlayer.setOnCompletionListener(this);
+        mediaPlayer.setOnPreparedListener(this);
+        mediaPlayer.setOnErrorListener(this);
         mediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
-        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        mediaPlayer.setLooping(true);
     }
 
     public void setList(ArrayList<File> musicList) {
-        this.musicList = musicList;
+        if(this.musicList == null) {
+            this.musicList = musicList;
+        }
     }
 
     public final class MusicBinder extends Binder {
@@ -65,23 +111,28 @@ public class MusicPlayer extends Service implements
         }
     }
 
-    // Must provide an interface that clients use to communicate with the service by returning an IBinder.
-    @Override
-    public IBinder onBind(Intent intent) {
-        return musicBind;
+    protected final void playPause() {
+        if(mediaPlayer.isPlaying()){
+            mediaPlayer.pause();
+        } else {
+            mediaPlayer.start();
+        }
     }
 
-    // When service instance is unbound; executes when user exits the app
-    @Override
-    public boolean onUnbind(Intent intent){
-        if(mediaPlayer!=null) {
-            if(mediaPlayer.isPlaying())
-                mediaPlayer.stop();
-            mediaPlayer.reset();
-            mediaPlayer.release();
-            mediaPlayer=null;
+    protected final void nextSong() {
+        cycleCounter++;
+        if (cycleCounter >= musicList.size()) {
+            cycleCounter = 0;
         }
-        return false;
+        playMusic(musicList.get(cycleCounter));
+    }
+
+    protected final void previousSong() {
+        cycleCounter--;
+        if (cycleCounter < 0) {
+            cycleCounter = musicList.size() - 1;
+        }
+        playMusic(musicList.get(cycleCounter));
     }
 
     protected final void playMusic(final File musicFile) {
@@ -106,11 +157,15 @@ public class MusicPlayer extends Service implements
 
     //Cycle & Play Music ArrayList
     protected final void cycle() {
-        if (cycleCounter >= musicList.size()) {
-            cycleCounter = 0;
+        if(mediaPlayer.isPlaying()) {
+            // keep playing
+        } else {
+            if (cycleCounter >= musicList.size()) {
+                cycleCounter = 0;
+            }
+            playMusic(musicList.get(cycleCounter));
+            cycleCounter++;
         }
-        playMusic(musicList.get(cycleCounter));
-        cycleCounter++;
     }
 
     protected final String getFilePath() {
@@ -119,6 +174,7 @@ public class MusicPlayer extends Service implements
 
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
+        Log.i("@MusicPlayer", "onError() is called!");
         // The MediaPlayer has moved to the Error state, must be reset!
         mp.reset();
         return false;
@@ -126,17 +182,19 @@ public class MusicPlayer extends Service implements
 
     @Override
     public void onPrepared(MediaPlayer mp) {
+        Log.i("@MusicPlayer", "onPrepared() is called!");
         mp.start();
     }
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-        cycle();
+        Log.i("@MusicPlayer", "onCompletion() is called!");
+        nextSong();
     }
 
-    // TODO: playback rules
+    //TODO: Foreground notifications
 
-    // TODO: LifeCycle
+    //TODO: AudioFocus
 
-    // TODO: Create Foreground Service - Notifications
+    //TODO: AUDIO_BECOMING_NOISY
 }
