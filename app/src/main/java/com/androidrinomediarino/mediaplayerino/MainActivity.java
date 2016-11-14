@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.res.Configuration;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -69,8 +70,8 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
 
         if(musicIntent==null){
             musicIntent = new Intent(this, MusicPlayer.class);
-            bindService(musicIntent, musicPlayerConnection, Context.BIND_AUTO_CREATE);
             startService(musicIntent);
+            bindService(musicIntent, musicPlayerConnection, Context.BIND_AUTO_CREATE);
         }
     }
 
@@ -78,12 +79,18 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
     protected void onDestroy() {
         super.onDestroy();
 
-        stopService(musicIntent);
-        musicPlayer = null;
+        //stopService(musicIntent);
+        //musicPlayer = null;
 
         if (musicPlayerConnection != null) {
             unbindService(musicPlayerConnection);
         }
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig)
+    {
+        // manifest use android:configChanges="orientation"
     }
 
     @Override
@@ -167,7 +174,6 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
     // Verify Permission Granted
     @Override
     public void onRequestPermissionsResult(final int requestCode, final String permissions[], final int[] grantResults) {
-
         switch (requestCode) {
             case REQUEST_CODE_EXTERNAL_STORAGE: {
                 // If request is cancelled, the result arrays are empty.
@@ -187,18 +193,14 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
                 }
 
             } break;
-
-            default:
-                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+            default: super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }
 
     // TODO: ASYNC tasks are funneled here
-    // MusicPlayer & musicList ready
     private void run() {
-
+        // MusicPlayer & musicList ready
         if(musicPlayer != null && musicFiles != null) {
-
             Log.i("X", "Service is bonded successfully!");
 
             // Pass list of music files to MusicPlayer
@@ -209,25 +211,31 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
             getSupportFragmentManager()
                     .beginTransaction()
                     .add(R.id.fragment_container, initialFragment, "CURRENT_PLAYLIST")
-                    //.commit();
+                    //.commit(); // TODO: Resolve error from commit
                     .commitAllowingStateLoss();
 
             findViewById(R.id.btn_previous).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(final View view) {
-                    // TODO: Insert onclick logic for the previous button.
+                    Log.i("@MainActivity", "musicPlayer.previousSong() is called!");
+                    musicPlayer.previousSong();
+                    //TODO: Refresh album cover
                 }
             });
             findViewById(R.id.btn_play).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(final View view) {
-                    // TODO: Insert onclick logic for the play button.
+                    Log.i("@MainActivity", "musicPlayer.playPause() is called!");
+                    musicPlayer.playPause();
+                    //TODO: Refresh album cover
                 }
             });
             findViewById(R.id.btn_next).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(final View view) {
-                    // TODO: Insert onclick logic for the next button.
+                    Log.i("@MainActivity", "musicPlayer.nextSong() is called!");
+                    musicPlayer.nextSong();
+                    //TODO: Refresh album cover
                 }
             });
 
