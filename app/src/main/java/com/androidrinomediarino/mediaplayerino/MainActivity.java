@@ -203,6 +203,9 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
         if(musicPlayer != null && musicFiles != null) {
             Log.i("X", "Service is bonded successfully!");
 
+            // Using the music files, create song objects and add to list.
+            SongList.addSongsToList(this, musicFiles);
+
             // Pass list of music files to MusicPlayer
             musicPlayer.setList(musicFiles);
 
