@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -73,7 +74,12 @@ public class CurrentPlaylistFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        final List<String> songList = scanner.GetSongNameAndArtist();
+        final List<String> songList = new ArrayList<>();
+
+        for (SongList.Song song : SongList.SongList) {
+            songList.add(song.songName + " - " + song.artistName);
+        }
+
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity().getApplicationContext(), R.layout.songlist_listview_item_layout, songList);
 
         ListView playlist = (ListView) view.findViewById(R.id.listView_playlist);

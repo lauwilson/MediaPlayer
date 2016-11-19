@@ -224,11 +224,12 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
             // MusicPlayer & musicFiles ready
             Log.i("X", "Service is bonded successfully!");
 
-
             seekBar = (SeekBar)findViewById(R.id.seekBar);
             //seekBar.setClickable(false);
             musicPlayer.setSeekBar(seekBar);
 
+            // Using the music files, create song objects and add to list.
+            SongList.addSongsToList(this, musicFiles);
 
             // Pass list of music files to MusicPlayer
             musicPlayer.setList(musicFiles);
