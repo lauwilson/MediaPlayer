@@ -22,6 +22,9 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.SeekBar;
 import android.widget.Toast;
 import java.io.File;
 import java.util.ArrayList;
@@ -198,7 +201,7 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
     }
 
     // TODO: ASYNC tasks are funneled here
-    private void run() {
+    private final void run() {
         // MusicPlayer & musicList ready
         if(musicPlayer != null && musicFiles != null) {
             Log.i("X", "Service is bonded successfully!");
@@ -230,6 +233,9 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
                     //TODO: Refresh album cover
                 }
             });
+
+            ImageButton nextButton = (ImageButton) findViewById(R.id.btn_next);
+
             findViewById(R.id.btn_next).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(final View view) {
@@ -239,10 +245,32 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
                 }
             });
 
+            SeekBar seekBar = (SeekBar) findViewById(R.id.seekBar);
+            seekBar.setOnSeekBarChangeListener(seekBarChangeListener);
+
             // TODO: Placeholder auto play all music
-            musicPlayer.cycle();
+            musicPlayer.startOrContinue();
         }
     }
+
+    private final SeekBar.OnSeekBarChangeListener seekBarChangeListener = new SeekBar.OnSeekBarChangeListener() {
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
+            // TODO Auto-generated method stub
+        }
+
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+            // TODO Auto-generated method stub
+        }
+
+        @Override
+        public void onProgressChanged(final SeekBar seekBar, final int progress, final boolean fromUser) {
+            //musicPlayer.seek(seekBar, progress, fromUser);
+            //t1.setTextSize(progress);
+            //oast.makeText(getApplicationContext(), String.valueOf(progress),Toast.LENGTH_LONG).show();
+        }
+    };
 
     /**
      * Implementation of OnFragmentInteraction interface method.

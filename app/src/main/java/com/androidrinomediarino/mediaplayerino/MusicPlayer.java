@@ -12,6 +12,7 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.widget.SeekBar;
 
 import java.io.File;
 import java.io.IOException;
@@ -155,17 +156,26 @@ public class MusicPlayer extends Service implements
         // TODO: TimerTask for quicker tests
     }
 
-    //Cycle & Play Music ArrayList
-    protected final void cycle() {
+    // Continue previous song or start playing first song
+    protected final void startOrContinue() {
         if(mediaPlayer.isPlaying()) {
             // keep playing
         } else {
-            if (cycleCounter >= musicList.size()) {
-                cycleCounter = 0;
-            }
-            playMusic(musicList.get(cycleCounter));
-            cycleCounter++;
+            playMusic(musicList.get(0));
         }
+    }
+
+    protected final void seek(final SeekBar seekBar, final int progress, final boolean fromUser) {
+        if (!fromUser) {
+            return;
+        }
+
+        Log.i("@MusicPlayer", "mediaPlayer.getDuration() is called!");
+        seekBar.setMax(mediaPlayer.getDuration());
+        //if(mediaPlayer != null && fromUser) {
+        mediaPlayer.seekTo(progress);
+        //}
+
     }
 
     protected final String getFilePath() {
