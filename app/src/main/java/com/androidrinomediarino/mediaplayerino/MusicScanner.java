@@ -11,25 +11,34 @@ import java.util.HashMap;
 
 public class MusicScanner {
 
+    public enum SongGroupings {
+        ARTIST,
+        GENRE,
+        ALBUM
+    }
+
     private static MusicScanner     instance = new MusicScanner();
     private File                    musicDirPath;
     private ArrayList<File>         musicFiles;
     private List<File>              sortedMusicFiles;
     private MediaMetadataRetriever  retriever = new MediaMetadataRetriever();
     private Map<String, ArrayList<File>>    _songsByArtist;
+    private Map<String, ArrayList<File>>    _songsByGenre;
+    private Map<String, ArrayList<File>>    _songsByAlbum;
 
     private MusicScanner() {
 
         // Init ArrayList
         musicFiles = new ArrayList<>();
         _songsByArtist = new HashMap<String, ArrayList<File>>();
+        _songsByGenre = new HashMap<String, ArrayList<File>>();
+        _songsByAlbum = new HashMap<String, ArrayList<File>>();
 
         // Access MUSIC directory
         musicDirPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC);
 
         // Scan for music; musicFiles lists all music
         scanMusic(musicDirPath);
-        String a = "";
     }
 
     // Thread-safe singleton
@@ -61,12 +70,30 @@ public class MusicScanner {
 
     private void addToDefaultPlaylists(File file) {
         retriever.setDataSource(file.getAbsolutePath());
+
+        // Sort By Artist
         String artist = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
         artist = (artist == null) ? "Unknown Artist" : artist;
         if (!_songsByArtist.containsKey(artist)) {
             _songsByArtist.put(artist, new ArrayList<File>());
         }
         _songsByArtist.get(artist).add(file);
+
+        // Sort By Genre
+        String genre = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE);
+        genre = (genre == null) ? "Unknown Genre" : genre;
+        if (!_songsByGenre.containsKey(genre)) {
+            _songsByGenre.put(genre, new ArrayList<File>());
+        }
+        _songsByGenre.get(genre).add(file);
+
+        // Sort by
+        String album = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
+        album = (album == null) ? "Unknown Album" : album;
+        if (!_songsByAlbum.containsKey(album)) {
+            _songsByAlbum.put(album, new ArrayList<File>());
+        }
+        _songsByAlbum.get(album).add(file);
     }
 
     // Check if musicFiles is NULL or EMPTY
@@ -116,9 +143,9 @@ public class MusicScanner {
         return songs;
     }
 
-    public Map<String, ArrayList<File>> getSongsByArtist() {
-        return _songsByArtist;
-    }
+    public Map<String, ArrayList<File>> getSongsByArtist() { return _songsByArtist; }
+    public Map<String, ArrayList<File>> getSongsByGenre() { return _songsByGenre; }
+    public Map<String, ArrayList<File>> getSongsByAlbum() { return _songsByAlbum; }
 
     public final List<File> SortFiles() {
         List<File> sortedFiles = new ArrayList<>();

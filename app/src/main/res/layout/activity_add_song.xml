@@ -46,6 +46,10 @@
                     android:layout_height="match_parent"
                     android:orientation="vertical">
 
+                    <ListView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:id="@+id/listView_songsByGenre" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -54,6 +58,10 @@
                     android:layout_height="match_parent"
                     android:orientation="vertical">
 
+                    <ListView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:id="@+id/listView_songsByAlbum" />
                 </LinearLayout>
             </FrameLayout>
         </LinearLayout>
