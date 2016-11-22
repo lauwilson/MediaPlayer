@@ -17,6 +17,12 @@ public class SongList {
         }
     }
 
+    public static void sortList(SortOrderEnum order, SortByEnum by) {
+        SongCompare comparer = new SongCompare(order, by);
+
+        comparer.sortList();
+    }
+
     public static final class Song {
         private MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         private Context context;
