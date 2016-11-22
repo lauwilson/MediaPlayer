@@ -3,9 +3,11 @@ package com.androidrinomediarino.mediaplayerino;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -76,14 +78,23 @@ public class CurrentPlaylistFragment extends Fragment {
 
         final List<String> songList = new ArrayList<>();
 
-        for (SongList.Song song : MusicScanner.getInstance().getMusicFiles()) {
+        for (SongList.Song song : scanner.getMusicFiles()) {
             songList.add(song.songName + " - " + song.artistName);
         }
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity().getApplicationContext(), R.layout.songlist_listview_item_layout, songList);
+        SongAdapter adapter = new SongAdapter(getContext(), R.layout.songlist_listview_item_layout, scanner.getMusicFiles());
 
         ListView playlist = (ListView) view.findViewById(R.id.listView_playlist);
         playlist.setAdapter(adapter);
+        playlist.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                SongList.Song selectedSong = (SongList.Song) parent.getItemAtPosition(position);
+               if (mListener != null) {
+                   mListener.btn_playlistSongSelect_onClick(selectedSong);
+               }
+            }
+        });
 
         view.findViewById(R.id.btn_switchFragment).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -120,5 +131,7 @@ public class CurrentPlaylistFragment extends Fragment {
      */
     public interface OnFragmentInteractionListener {
         void btn_fragmentSwitch_onClick();
+        void btn_playlistSongSelect_onClick(SongList.Song song);
     }
+
 }
