@@ -7,28 +7,35 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
+        android:name="com.androidrinomediarino.mediaplayerino.MainApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity"
+        <activity
+            android:name=".MainActivity"
             android:configChanges="orientation">
-            <!--android:screenOrientation="portrait"
-            android:configChanges="keyboardHidden|orientation"-->
+
+            <!--
+            android:screenOrientation="portrait"
+            android:configChanges="keyboardHidden|orientation"
+            -->
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
         <service
             android:name=".MusicPlayer"
-            android:exported="false"
-            android:enabled="true" />
+            android:enabled="true"
+            android:exported="false" />
 
-        <activity android:name=".AddSongActivity"></activity>
+        <activity android:name=".AddSongActivity" />
+        <activity android:name=".SongListActivity"></activity>
     </application>
 
 </manifest>

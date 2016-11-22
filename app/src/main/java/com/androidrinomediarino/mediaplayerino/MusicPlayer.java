@@ -29,7 +29,7 @@ public class MusicPlayer extends Service implements
     private MediaPlayer         mediaPlayer;
     private String              filePath;
     private int                 cycleCounter = 0;
-    private ArrayList<File>     musicList;
+    private ArrayList<SongList.Song>     musicList;
     private final IBinder       musicBind = new MusicBinder();      // interface for clients that bind
     protected SeekBar           seekBar;
     private int                 duration;
@@ -100,7 +100,7 @@ public class MusicPlayer extends Service implements
         //mediaPlayer.setLooping(true);
     }
 
-    public void setList(ArrayList<File> musicList) {
+    public void setList(ArrayList<SongList.Song> musicList) {
         if(this.musicList == null) {
             this.musicList = musicList;
         }
@@ -136,15 +136,14 @@ public class MusicPlayer extends Service implements
         playMusic(musicList.get(cycleCounter));
     }
 
-    protected final void playMusic(final File musicFile) {
+    protected final void playMusic(final SongList.Song song) {
         mediaPlayer.reset();
 
         //Play Music
         try {
-            filePath = musicFile.getAbsolutePath();
-
             //Initialized State
-            mediaPlayer.setDataSource(filePath);
+            mediaPlayer.setDataSource(song.filePath);
+            MusicScanner.getInstance().setCurrentSong(song);
 
             //Android requires prepare() before play, calls setOnPreparedListener
             //Prepared State, can call start()
