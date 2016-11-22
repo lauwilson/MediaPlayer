@@ -25,8 +25,10 @@ public class SongList {
         String songName;
         String artistName;
         String albumName;
+        String genre;
         Bitmap coverArt;
 
+        // this constructor is probably redundant now, since we can get the application context from the MainApplication class.
         public Song(Context context, File file) {
             this.context = context;
             this.file = file;
@@ -36,6 +38,18 @@ public class SongList {
             extractArtistName();
             extractAlbumName();
             extractCoverArt();
+            extractGenre();
+        }
+
+        public Song(File file) {
+            this.file = file;
+            filePath = file.getAbsolutePath();
+            retriever.setDataSource(filePath);
+            extractSongName();
+            extractArtistName();
+            extractAlbumName();
+            extractCoverArt();
+            extractGenre();
         }
 
         private void extractSongName() {
@@ -44,6 +58,14 @@ public class SongList {
             extractedSongName = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
 
             songName = extractedSongName == null ? "Unknown Song" : extractedSongName;
+        }
+
+        private void extractGenre() {
+            String extractedGenre;
+
+            extractedGenre = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE);
+
+            genre = (extractedGenre == null) ? "Unknown Genre" : extractedGenre;
         }
 
         private void extractArtistName(){
@@ -72,7 +94,7 @@ public class SongList {
             }
             else
             {
-                coverArt = BitmapFactory.decodeResource(context.getResources(),
+                coverArt = BitmapFactory.decodeResource(MainApplication.getContext().getResources(),
                         R.drawable.default_album_art);
             }
         }

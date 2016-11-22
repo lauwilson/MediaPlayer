@@ -68,42 +68,14 @@ public class SongMetadataFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_song_metadata, container, false);
+        SongList.Song song = MusicScanner.getInstance().getCurrentSong();
 
-        Bundle arguments = this.getArguments();
-        if (arguments != null){
-            ImageView coverImage = (ImageView) view.findViewById(R.id.imageView);
-            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-            TextView songInfo;
+        ImageView coverImage = (ImageView) view.findViewById(R.id.imageView);
 
-            retriever.setDataSource(arguments.getString("filePath"));
+        coverImage.setImageBitmap(song.coverArt);
 
-            byte[] coverArtBytes =  retriever.getEmbeddedPicture();
-            if(coverArtBytes!=null)
-            {
-                Bitmap bitmap = BitmapFactory.
-                        decodeByteArray(coverArtBytes, 0, coverArtBytes.length);
-                coverImage.setImageBitmap(bitmap);
-            }
-            else
-            {
-                coverImage.setImageDrawable(coverImage.getResources().
-                        getDrawable(R.drawable.default_album_art));
-            }
-
-            songInfo = (TextView)view.findViewById(R.id.textView);
-
-            String songName = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
-            if (songName == null) {
-                songName = "";
-            }
-
-            String artistName = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
-            if (artistName == null) {
-                artistName = "";
-            }
-
-            songInfo.setText(songName + " - " + artistName);
-        }
+        TextView songInfo = (TextView)view.findViewById(R.id.textView);
+        songInfo.setText(song.songName + " - " + song.artistName);
 
         return view;
     }

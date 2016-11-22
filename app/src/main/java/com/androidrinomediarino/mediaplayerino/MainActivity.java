@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
 
     //MusicScanner
     private MusicScanner        musicScanner;
-    private ArrayList<File>     musicFiles;
+    private ArrayList<SongList.Song>     musicFiles;
 
     //MusicPlayer Service
     private MusicPlayer         musicPlayer;
@@ -229,7 +229,7 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
             musicPlayer.setSeekBar(seekBar);
 
             // Using the music files, create song objects and add to list.
-            SongList.addSongsToList(this, musicFiles);
+//            SongList.addSongsToList(this, musicFiles);
 
             // Pass list of music files to MusicPlayer
             musicPlayer.setList(musicFiles);

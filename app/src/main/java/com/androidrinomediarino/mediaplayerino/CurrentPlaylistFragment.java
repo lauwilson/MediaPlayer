@@ -76,7 +76,7 @@ public class CurrentPlaylistFragment extends Fragment {
 
         final List<String> songList = new ArrayList<>();
 
-        for (SongList.Song song : SongList.SongList) {
+        for (SongList.Song song : MusicScanner.getInstance().getMusicFiles()) {
             songList.add(song.songName + " - " + song.artistName);
         }
 
