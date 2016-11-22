@@ -293,6 +293,10 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
         }
     }
 
+    public void btn_playlistSongSelect_onClick(SongList.Song song) {
+        musicPlayer.playMusic(song);
+    }
+
     public void menu_addSongs_onClick(MenuItem menuItem) {
         Intent intent = new Intent(getApplicationContext(), AddSongActivity.class);
         startActivity(intent);
