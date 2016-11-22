@@ -6,6 +6,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.res.Configuration;
+import android.media.MediaPlayer;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -22,6 +24,9 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.SeekBar;
 import android.widget.Toast;
 import java.io.File;
 import java.util.ArrayList;
@@ -45,6 +50,7 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
     private MusicPlayer         musicPlayer;
     private Intent              musicIntent;
     protected boolean           musicBound = false;
+    private SeekBar             seekBar;
 
     //Connect to MusicPlayer Service
     private ServiceConnection musicPlayerConnection = new ServiceConnection() {
@@ -198,10 +204,32 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
     }
 
     // TODO: ASYNC tasks are funneled here
-    private void run() {
-        // MusicPlayer & musicList ready
+    private final void run() {
+        Log.i("@MainActivity", "run() is called!");
+        if(musicPlayer != null) {
+            if(seekBar == null) {
+                seekBar = (SeekBar)findViewById(R.id.seekBar);
+                musicPlayer.setSeekBar(seekBar);
+            }
+            ImageButton previousButton      = (ImageButton) findViewById(R.id.btn_previous);
+            ImageButton playPauseButton     = (ImageButton) findViewById(R.id.btn_play);
+            ImageButton nextButton          = (ImageButton) findViewById(R.id.btn_next);
+
+            previousButton.setOnClickListener(previousButtonListener);
+            playPauseButton.setOnClickListener(playPauseButtonListener);
+            nextButton.setOnClickListener(nextButtonListener);
+        }
+        
         if(musicPlayer != null && musicFiles != null) {
+            // MusicPlayer & musicFiles ready
             Log.i("X", "Service is bonded successfully!");
+
+            seekBar = (SeekBar)findViewById(R.id.seekBar);
+            //seekBar.setClickable(false);
+            musicPlayer.setSeekBar(seekBar);
+
+            // Using the music files, create song objects and add to list.
+            SongList.addSongsToList(this, musicFiles);
 
             // Pass list of music files to MusicPlayer
             musicPlayer.setList(musicFiles);
@@ -214,35 +242,38 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
                     //.commit(); // TODO: Resolve error from commit
                     .commitAllowingStateLoss();
 
-            findViewById(R.id.btn_previous).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(final View view) {
-                    Log.i("@MainActivity", "musicPlayer.previousSong() is called!");
-                    musicPlayer.previousSong();
-                    //TODO: Refresh album cover
-                }
-            });
-            findViewById(R.id.btn_play).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(final View view) {
-                    Log.i("@MainActivity", "musicPlayer.playPause() is called!");
-                    musicPlayer.playPause();
-                    //TODO: Refresh album cover
-                }
-            });
-            findViewById(R.id.btn_next).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(final View view) {
-                    Log.i("@MainActivity", "musicPlayer.nextSong() is called!");
-                    musicPlayer.nextSong();
-                    //TODO: Refresh album cover
-                }
-            });
-
             // TODO: Placeholder auto play all music
-            musicPlayer.cycle();
+            musicPlayer.startOrContinue();
+            Log.i("@MainActivity", "musicPlayer.startOrContinue() is called!");
         }
     }
+
+    private final View.OnClickListener previousButtonListener = new View.OnClickListener() {
+        @Override
+        public void onClick(final View view) {
+            Log.i("@MainActivity", "musicPlayer.previousSong() is called!");
+            musicPlayer.previousSong();
+            //TODO: Refresh album cover
+        }
+    };
+
+    private final View.OnClickListener playPauseButtonListener = new View.OnClickListener() {
+        @Override
+        public void onClick(final View view) {
+            Log.i("@MainActivity", "musicPlayer.playPause() is called!");
+            musicPlayer.playPause();
+            //TODO: Refresh album cover
+        }
+    };
+
+    private final View.OnClickListener nextButtonListener = new View.OnClickListener() {
+        @Override
+        public void onClick(final View view) {
+            Log.i("@MainActivity", "musicPlayer.nextSong() is called!");
+            musicPlayer.nextSong();
+            //TODO: Refresh album cover
+        }
+    };
 
     /**
      * Implementation of OnFragmentInteraction interface method.

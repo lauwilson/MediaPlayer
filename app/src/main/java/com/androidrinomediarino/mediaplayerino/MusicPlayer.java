@@ -8,10 +8,13 @@ import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.widget.SeekBar;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,8 +31,8 @@ public class MusicPlayer extends Service implements
     private int                 cycleCounter = 0;
     private ArrayList<File>     musicList;
     private final IBinder       musicBind = new MusicBinder();      // interface for clients that bind
-    private int                 mStartMode;                         // indicates how to behave if the service is killed
-    private boolean             mAllowRebind;                       // indicates whether onRebind should be used
+    protected SeekBar           seekBar;
+    private int                 duration;
 
     @Override
     public void onCreate() {
@@ -44,7 +47,6 @@ public class MusicPlayer extends Service implements
         Log.i("@MusicPlayer", "onStartCommand() is called!");
         // The service is starting, due to a call to startService()
         return START_STICKY;
-        //return mStartMode;
     }
 
     @Override
@@ -59,7 +61,6 @@ public class MusicPlayer extends Service implements
         Log.i("@MusicPlayer", "onUnbind() is called!");
         // All clients have unbound with unbindService()
         return false;
-        //return mAllowRebind;
     }
 
     @Override
@@ -95,8 +96,8 @@ public class MusicPlayer extends Service implements
         mediaPlayer.setOnCompletionListener(this);
         mediaPlayer.setOnPreparedListener(this);
         mediaPlayer.setOnErrorListener(this);
-        mediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
-        mediaPlayer.setLooping(true);
+        //mediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
+        //mediaPlayer.setLooping(true);
     }
 
     public void setList(ArrayList<File> musicList) {
@@ -137,6 +138,7 @@ public class MusicPlayer extends Service implements
 
     protected final void playMusic(final File musicFile) {
         mediaPlayer.reset();
+
         //Play Music
         try {
             filePath = musicFile.getAbsolutePath();
@@ -152,19 +154,22 @@ public class MusicPlayer extends Service implements
             //setDataSource file might not exist
             e.printStackTrace();
         }
-        // TODO: TimerTask for quicker tests
     }
 
-    //Cycle & Play Music ArrayList
-    protected final void cycle() {
+    // Continue previous song or start playing first song
+    protected final void startOrContinue() {
         if(mediaPlayer.isPlaying()) {
             // keep playing
         } else {
-            if (cycleCounter >= musicList.size()) {
-                cycleCounter = 0;
-            }
-            playMusic(musicList.get(cycleCounter));
-            cycleCounter++;
+            playMusic(musicList.get(0));
+        }
+    }
+
+    protected void setSeekBar(final SeekBar seekBar) {
+        this.seekBar = seekBar;
+        seekBar.setOnSeekBarChangeListener(seekBarChangeListener);
+        if(this.seekBar != null && this.mediaPlayer != null) {
+            seekBar.setMax(duration);
         }
     }
 
@@ -174,8 +179,8 @@ public class MusicPlayer extends Service implements
 
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
-        Log.i("@MusicPlayer", "onError() is called!");
         // The MediaPlayer has moved to the Error state, must be reset!
+        Log.i("@MusicPlayer", "onError() is called!");
         mp.reset();
         return false;
     }
@@ -184,12 +189,77 @@ public class MusicPlayer extends Service implements
     public void onPrepared(MediaPlayer mp) {
         Log.i("@MusicPlayer", "onPrepared() is called!");
         mp.start();
+        duration = mediaPlayer.getDuration();
+        seekBar.setMax(duration);
+        updatePosition();
     }
 
     @Override
     public void onCompletion(MediaPlayer mp) {
         Log.i("@MusicPlayer", "onCompletion() is called!");
         nextSong();
+    }
+
+    private final SeekBar.OnSeekBarChangeListener seekBarChangeListener = new SeekBar.OnSeekBarChangeListener() {
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
+            // TODO Auto-generated method stub
+        }
+
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+            // TODO Auto-generated method stub
+        }
+
+        @Override
+        public void onProgressChanged(final SeekBar seekBar, final int progress, final boolean fromUser) {
+            if(fromUser) {
+                Log.i("@MusicPlayer", "mediaPlayer.getDuration() is called!");
+                Toast.makeText(getApplicationContext(), getTimeString(progress), Toast.LENGTH_SHORT).show();
+                mediaPlayer.seekTo(progress);
+            } else {
+                return;
+            }
+        }
+    };
+
+    private String getTimeString(long millis) {
+        StringBuffer buffer = new StringBuffer();
+
+        int hours       = (int) millis / (1000*60*60);
+        int minutes     = (int) ( millis % (1000*60*60) ) / (1000*60);
+        int seconds     = (int) ( ( millis % (1000*60*60) ) % (1000*60) ) / 1000;
+
+        buffer
+                .append(String.format("%02d", hours))
+                .append(":")
+                .append(String.format("%02d", minutes))
+                .append(":")
+                .append(String.format("%02d", seconds));
+
+        return buffer.toString();
+    }
+
+
+    // TODO: consider adding progress timer
+
+    private final Handler handler = new Handler();
+
+    private final Runnable updatePositionRunnable = new Runnable() {
+        public void run() {
+            updatePosition();
+        }
+    };
+
+    private void updatePosition() {
+        handler.removeCallbacks(updatePositionRunnable);
+        if (mediaPlayer != null) {
+            seekBar.setProgress(mediaPlayer.getCurrentPosition());
+            //Toast.makeText(getApplicationContext(), getTimeString(mediaPlayer.getCurrentPosition()), Toast.LENGTH_SHORT).show();
+            //Log.i("@MusicPlayer: Progress:", getTimeString(mediaPlayer.getCurrentPosition()));
+        }
+
+        handler.postDelayed(updatePositionRunnable, 500);
     }
 
     //TODO: Foreground notifications
