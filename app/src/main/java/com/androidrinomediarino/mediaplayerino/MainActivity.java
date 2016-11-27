@@ -51,6 +51,9 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
     private Intent              musicIntent;
     protected boolean           musicBound = false;
     private SeekBar             seekBar;
+    private ImageButton         previousButton;
+    private ImageButton         playPauseButton;
+    private ImageButton         nextButton;
 
     //Connect to MusicPlayer Service
     private ServiceConnection musicPlayerConnection = new ServiceConnection() {
@@ -211,9 +214,9 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
                 seekBar = (SeekBar)findViewById(R.id.seekBar);
                 musicPlayer.setSeekBar(seekBar);
             }
-            ImageButton previousButton      = (ImageButton) findViewById(R.id.btn_previous);
-            ImageButton playPauseButton     = (ImageButton) findViewById(R.id.btn_play);
-            ImageButton nextButton          = (ImageButton) findViewById(R.id.btn_next);
+            previousButton      = (ImageButton) findViewById(R.id.btn_previous);
+            playPauseButton     = (ImageButton) findViewById(R.id.btn_play);
+            nextButton          = (ImageButton) findViewById(R.id.btn_next);
 
             previousButton.setOnClickListener(previousButtonListener);
             playPauseButton.setOnClickListener(playPauseButtonListener);
@@ -229,7 +232,7 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
             musicPlayer.setSeekBar(seekBar);
 
             // Using the music files, create song objects and add to list.
-//            SongList.addSongsToList(this, musicFiles);
+            // SongList.addSongsToList(this, musicFiles);
 
             // Pass list of music files to MusicPlayer
             musicPlayer.setList(musicFiles);
@@ -253,7 +256,18 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
         public void onClick(final View view) {
             Log.i("@MainActivity", "musicPlayer.previousSong() is called!");
             musicPlayer.previousSong();
-            //TODO: Refresh album cover
+
+            //Update SONG_METADATA fragment
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            Fragment songMetaDataFragment = fragmentManager.findFragmentByTag("SONG_METADATA");
+
+            if (songMetaDataFragment != null && songMetaDataFragment.isVisible()) {
+                songMetaDataFragment = new SongMetadataFragment();
+                Bundle bundle = new Bundle();
+                bundle.putString("filePath", musicPlayer.getFilePath());
+                songMetaDataFragment.setArguments(bundle);
+                fragmentManager.beginTransaction().replace(R.id.fragment_container, songMetaDataFragment, "SONG_METADATA").commit();
+            }
         }
     };
 
@@ -261,8 +275,7 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
         @Override
         public void onClick(final View view) {
             Log.i("@MainActivity", "musicPlayer.playPause() is called!");
-            musicPlayer.playPause();
-            //TODO: Refresh album cover
+            musicPlayer.playPause(playPauseButton);
         }
     };
 
@@ -271,7 +284,18 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
         public void onClick(final View view) {
             Log.i("@MainActivity", "musicPlayer.nextSong() is called!");
             musicPlayer.nextSong();
-            //TODO: Refresh album cover
+
+            //Update SONG_METADATA fragment
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            Fragment songMetaDataFragment = fragmentManager.findFragmentByTag("SONG_METADATA");
+
+            if (songMetaDataFragment != null && songMetaDataFragment.isVisible()) {
+                songMetaDataFragment = new SongMetadataFragment();
+                Bundle bundle = new Bundle();
+                bundle.putString("filePath", musicPlayer.getFilePath());
+                songMetaDataFragment.setArguments(bundle);
+                fragmentManager.beginTransaction().replace(R.id.fragment_container, songMetaDataFragment, "SONG_METADATA").commit();
+            }
         }
     };
 

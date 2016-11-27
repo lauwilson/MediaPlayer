@@ -31,7 +31,7 @@
         <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:srcCompat="@android:drawable/ic_media_play"
+            app:srcCompat="@android:drawable/ic_media_pause"
             android:id="@+id/btn_play"
             android:layout_weight="1" />
 
