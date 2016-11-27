@@ -13,6 +13,7 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
@@ -29,10 +30,11 @@ public class MusicPlayer extends Service implements
     private MediaPlayer         mediaPlayer;
     private String              filePath;
     private int                 cycleCounter = 0;
-    private ArrayList<File>     musicList;
+    private ArrayList<SongList.Song>     musicList;
     private final IBinder       musicBind = new MusicBinder();      // interface for clients that bind
     protected SeekBar           seekBar;
     private int                 duration;
+    private Toast               toast = null;
 
     @Override
     public void onCreate() {
@@ -100,7 +102,7 @@ public class MusicPlayer extends Service implements
         //mediaPlayer.setLooping(true);
     }
 
-    public void setList(ArrayList<File> musicList) {
+    public void setList(ArrayList<SongList.Song> musicList) {
         if(this.musicList == null) {
             this.musicList = musicList;
         }
@@ -112,11 +114,13 @@ public class MusicPlayer extends Service implements
         }
     }
 
-    protected final void playPause() {
+    protected final void playPause(ImageButton playPauseButton) {
         if(mediaPlayer.isPlaying()){
             mediaPlayer.pause();
+            playPauseButton.setImageResource(android.R.drawable.ic_media_play);
         } else {
             mediaPlayer.start();
+            playPauseButton.setImageResource(android.R.drawable.ic_media_pause);
         }
     }
 
@@ -136,15 +140,14 @@ public class MusicPlayer extends Service implements
         playMusic(musicList.get(cycleCounter));
     }
 
-    protected final void playMusic(final File musicFile) {
+    protected final void playMusic(final SongList.Song song) {
         mediaPlayer.reset();
 
         //Play Music
         try {
-            filePath = musicFile.getAbsolutePath();
-
             //Initialized State
-            mediaPlayer.setDataSource(filePath);
+            mediaPlayer.setDataSource(song.filePath);
+            MusicScanner.getInstance().setCurrentSong(song);
 
             //Android requires prepare() before play, calls setOnPreparedListener
             //Prepared State, can call start()
@@ -214,8 +217,12 @@ public class MusicPlayer extends Service implements
         @Override
         public void onProgressChanged(final SeekBar seekBar, final int progress, final boolean fromUser) {
             if(fromUser) {
+                if(toast != null) {
+                    toast.cancel();
+                }
                 Log.i("@MusicPlayer", "mediaPlayer.getDuration() is called!");
-                Toast.makeText(getApplicationContext(), getTimeString(progress), Toast.LENGTH_SHORT).show();
+                toast = Toast.makeText(getApplicationContext(), getTimeString(progress), Toast.LENGTH_SHORT);
+                toast.show();
                 mediaPlayer.seekTo(progress);
             } else {
                 return;
