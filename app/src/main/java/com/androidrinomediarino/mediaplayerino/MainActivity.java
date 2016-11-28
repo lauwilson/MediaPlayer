@@ -32,7 +32,8 @@ import java.io.File;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements SongMetadataFragment.OnFragmentInteractionListener,
-                                                                CurrentPlaylistFragment.OnFragmentInteractionListener {
+                                                                CurrentPlaylistFragment.OnFragmentInteractionListener,
+                                                                ActivityCompat.OnRequestPermissionsResultCallback {
 
     // Storage Permissions variables
     private static final int    REQUEST_CODE_EXTERNAL_STORAGE = 1;
@@ -43,14 +44,15 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
     };
 
     //MusicScanner
-    private MusicScanner        musicScanner;
-    private ArrayList<SongList.Song>     musicFiles;
+//    private ArrayList<Song>     musicFiles;
 
     //MusicPlayer Service
     private MusicPlayer         musicPlayer;
+    private MusicScanner        musicScanner;
     private Intent              musicIntent;
     protected boolean           musicBound = false;
     private SeekBar             seekBar;
+    private boolean             _permissionsReady = false;
 
     //Connect to MusicPlayer Service
     private ServiceConnection musicPlayerConnection = new ServiceConnection() {
@@ -112,7 +114,6 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
 
         //Permissions: MainActivity, AndroidManifest.xml
         requestStoragePermissions(this);
-        onRequestPermissionsResult(REQUEST_CODE_EXTERNAL_STORAGE, PERMISSIONS_STORAGE, PERMISSION_GRANT_RESULT);
     }
 
     @Override
@@ -165,6 +166,8 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
                             }
                         });
             }
+        } else {
+            _permissionsReady = true;
         }
     }
 
@@ -187,10 +190,11 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
                     // Permission Granted: dependent code is ready to run
 
                     //Get list of music files
-                    musicScanner = MusicScanner.getInstance();
-                    musicFiles = musicScanner.getMusicFiles();
+//                    musicScanner = MusicScanner.getInstance();
+//                    musicFiles = musicScanner.getMusicFiles();
 
                     // TODO: ASYNC
+                    _permissionsReady = true;
                     run();
 
                 } else {
@@ -206,7 +210,7 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
     // TODO: ASYNC tasks are funneled here
     private final void run() {
         Log.i("@MainActivity", "run() is called!");
-        if(musicPlayer != null) {
+        if(musicPlayer != null && _permissionsReady) {
             if(seekBar == null) {
                 seekBar = (SeekBar)findViewById(R.id.seekBar);
                 musicPlayer.setSeekBar(seekBar);
@@ -218,34 +222,36 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
             previousButton.setOnClickListener(previousButtonListener);
             playPauseButton.setOnClickListener(playPauseButtonListener);
             nextButton.setOnClickListener(nextButtonListener);
-        }
-        
-        if(musicPlayer != null && musicFiles != null) {
-            // MusicPlayer & musicFiles ready
-            Log.i("X", "Service is bonded successfully!");
 
-            seekBar = (SeekBar)findViewById(R.id.seekBar);
-            //seekBar.setClickable(false);
-            musicPlayer.setSeekBar(seekBar);
+            musicScanner = MusicScanner.getInstance();
+            if(musicScanner.isInitialized()) {
+                // MusicPlayer & musicFiles ready
+                Log.i("X", "Service is bonded successfully!");
 
-            // Using the music files, create song objects and add to list.
+                seekBar = (SeekBar)findViewById(R.id.seekBar);
+                //seekBar.setClickable(false);
+                musicPlayer.setSeekBar(seekBar);
+
+                // Using the music files, create song objects and add to list.
 //            SongList.addSongsToList(this, musicFiles);
 
-            // Pass list of music files to MusicPlayer
-            musicPlayer.setList(musicFiles);
+                // Pass list of music files to MusicPlayer
+                musicPlayer.setList(SongList.SongList);
 
-            // Initialize the starting fragment
-            CurrentPlaylistFragment initialFragment = new CurrentPlaylistFragment();
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .add(R.id.fragment_container, initialFragment, "CURRENT_PLAYLIST")
-                    //.commit(); // TODO: Resolve error from commit
-                    .commitAllowingStateLoss();
+                // Initialize the starting fragment
+                CurrentPlaylistFragment initialFragment = new CurrentPlaylistFragment();
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .add(R.id.fragment_container, initialFragment, "CURRENT_PLAYLIST")
+                        //.commit(); // TODO: Resolve error from commit
+                        .commitAllowingStateLoss();
 
-            // TODO: Placeholder auto play all music
-            musicPlayer.startOrContinue();
-            Log.i("@MainActivity", "musicPlayer.startOrContinue() is called!");
+                // TODO: Placeholder auto play all music
+                musicPlayer.startOrContinue();
+                Log.i("@MainActivity", "musicPlayer.startOrContinue() is called!");
+            }
         }
+        
     }
 
     private final View.OnClickListener previousButtonListener = new View.OnClickListener() {
@@ -293,7 +299,7 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
         }
     }
 
-    public void btn_playlistSongSelect_onClick(SongList.Song song) {
+    public void btn_playlistSongSelect_onClick(Song song) {
         musicPlayer.playMusic(song);
     }
 

@@ -76,20 +76,14 @@ public class CurrentPlaylistFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        final List<String> songList = new ArrayList<>();
-
-        for (SongList.Song song : scanner.getMusicFiles()) {
-            songList.add(song.songName + " - " + song.artistName);
-        }
-
-        SongAdapter adapter = new SongAdapter(getContext(), R.layout.songlist_listview_item_layout, scanner.getMusicFiles());
+        SongAdapter adapter = new SongAdapter(getContext(), R.layout.songlist_listview_item_layout, SongList.SongList);
 
         ListView playlist = (ListView) view.findViewById(R.id.listView_playlist);
         playlist.setAdapter(adapter);
         playlist.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                SongList.Song selectedSong = (SongList.Song) parent.getItemAtPosition(position);
+                Song selectedSong = (Song) parent.getItemAtPosition(position);
                if (mListener != null) {
                    mListener.btn_playlistSongSelect_onClick(selectedSong);
                }
@@ -131,7 +125,7 @@ public class CurrentPlaylistFragment extends Fragment {
      */
     public interface OnFragmentInteractionListener {
         void btn_fragmentSwitch_onClick();
-        void btn_playlistSongSelect_onClick(SongList.Song song);
+        void btn_playlistSongSelect_onClick(Song song);
     }
 
 }

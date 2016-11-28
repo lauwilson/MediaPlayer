@@ -17,23 +17,24 @@ public class MusicScanner {
         ALBUM
     }
 
-    private static MusicScanner     instance = new MusicScanner();
+    private static MusicScanner     instance;
+    private boolean                 _initialized = false;
     private File                    musicDirPath;
-    private ArrayList<SongList.Song>         musicFiles;
+    private ArrayList<Song>         musicFiles;
     private List<File>              sortedMusicFiles;
     private MediaMetadataRetriever  retriever = new MediaMetadataRetriever();
-    private Map<String, ArrayList<SongList.Song>>    _songsByArtist;
-    private Map<String, ArrayList<SongList.Song>>    _songsByGenre;
-    private Map<String, ArrayList<SongList.Song>>    _songsByAlbum;
-    private SongList.Song   _currentSong;
+    private Map<String, ArrayList<Song>>    _songsByArtist;
+    private Map<String, ArrayList<Song>>    _songsByGenre;
+    private Map<String, ArrayList<Song>>    _songsByAlbum;
+    private Song   _currentSong;
 
     private MusicScanner() {
 
         // Init ArrayList
-        musicFiles = new ArrayList<>();
-        _songsByArtist = new HashMap<String, ArrayList<SongList.Song>>();
-        _songsByGenre = new HashMap<String, ArrayList<SongList.Song>>();
-        _songsByAlbum = new HashMap<String, ArrayList<SongList.Song>>();
+//        musicFiles = new ArrayList<>();
+        _songsByArtist = new HashMap<String, ArrayList<Song>>();
+        _songsByGenre = new HashMap<String, ArrayList<Song>>();
+        _songsByAlbum = new HashMap<String, ArrayList<Song>>();
 
         // Access MUSIC directory
         musicDirPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC);
@@ -42,16 +43,22 @@ public class MusicScanner {
         scanMusic(musicDirPath);
     }
 
-    public SongList.Song getCurrentSong() {
+    public Song getCurrentSong() {
         return _currentSong;
     }
 
-    public void setCurrentSong(SongList.Song song) {
+    public void setCurrentSong(Song song) {
         _currentSong = song;
     }
 
+    public boolean isInitialized() { return _initialized; };
+
     // Thread-safe singleton
     public static MusicScanner getInstance() {
+        if (instance == null) {
+            instance = new MusicScanner();
+            instance._initialized = true;
+        }
         return instance;
     }
 
@@ -71,36 +78,37 @@ public class MusicScanner {
                        f.getName().endsWith(".flac") ||
                        f.getName().endsWith(".wav"))
             {
-                SongList.Song song = new SongList.Song(f);
-                musicFiles.add(song);
+                Song song = new Song(f);
+                SongList.addSongToList(song);
                 addToDefaultPlaylists(song);
             }
         }
+        _initialized = true;
     }
 
-    private void addToDefaultPlaylists(SongList.Song song) {
+    private void addToDefaultPlaylists(Song song) {
         // Sort By Artist
         if (!_songsByArtist.containsKey(song.artistName)) {
-            _songsByArtist.put(song.artistName, new ArrayList<SongList.Song>());
+            _songsByArtist.put(song.artistName, new ArrayList<Song>());
         }
         _songsByArtist.get(song.artistName).add(song);
 
         // Sort By Genre
         if (!_songsByGenre.containsKey(song.genre)) {
-            _songsByGenre.put(song.genre, new ArrayList<SongList.Song>());
+            _songsByGenre.put(song.genre, new ArrayList<Song>());
         }
         _songsByGenre.get(song.genre).add(song);
 
         // Sort by Album
         if (!_songsByAlbum.containsKey(song.albumName)) {
-            _songsByAlbum.put(song.albumName, new ArrayList<SongList.Song>());
+            _songsByAlbum.put(song.albumName, new ArrayList<Song>());
         }
         _songsByAlbum.get(song.albumName).add(song);
     }
 
     // Check if musicFiles is NULL or EMPTY
     public final boolean hasMusic() {
-        if(musicFiles != null && musicFiles.size() > 0) {
+        if(SongList.SongList != null && SongList.SongList.size() > 0) {
             return true;
         } else {
             return false;
@@ -108,9 +116,9 @@ public class MusicScanner {
     }
 
     // Get all music
-    public final ArrayList<SongList.Song> getMusicFiles() {
-        return musicFiles;
-    }
+//    public final ArrayList<Song> getMusicFiles() {
+//        return musicFiles;
+//    }
 
     public List<String> GetSongNameAndArtist() {
         List<String> songs = new ArrayList<>();
@@ -145,9 +153,9 @@ public class MusicScanner {
         return songs;
     }
 
-    public Map<String, ArrayList<SongList.Song>> getSongsByArtist() { return _songsByArtist; }
-    public Map<String, ArrayList<SongList.Song>> getSongsByGenre() { return _songsByGenre; }
-    public Map<String, ArrayList<SongList.Song>> getSongsByAlbum() { return _songsByAlbum; }
+    public Map<String, ArrayList<Song>> getSongsByArtist() { return _songsByArtist; }
+    public Map<String, ArrayList<Song>> getSongsByGenre() { return _songsByGenre; }
+    public Map<String, ArrayList<Song>> getSongsByAlbum() { return _songsByAlbum; }
 
     public final List<File> SortFiles() {
         List<File> sortedFiles = new ArrayList<>();
