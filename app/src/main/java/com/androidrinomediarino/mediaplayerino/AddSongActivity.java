@@ -1,5 +1,6 @@
 package com.androidrinomediarino.mediaplayerino;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -19,6 +20,7 @@ import java.util.Set;
 public class AddSongActivity extends AppCompatActivity {
 
     private MusicScanner scanner = MusicScanner.getInstance();
+    private final static int SONG_SELECT = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +44,7 @@ public class AddSongActivity extends AppCompatActivity {
         albumSpec.setIndicator("Album");
         host.addTab(albumSpec);
 
-        HashMap<String, ArrayList<File>> songsByArtist = (HashMap) scanner.getSongsByArtist();
+        HashMap<String, ArrayList<Song>> songsByArtist = (HashMap) scanner.getSongsByArtist();
         String[] artistList = songsByArtist.keySet().toArray(new String[songsByArtist.size()]);
         Arrays.sort(artistList);
         ArrayAdapter<String> artistAdapter = new ArrayAdapter<String>(this,
@@ -50,7 +52,7 @@ public class AddSongActivity extends AppCompatActivity {
                                                                    artistList);
         ((ListView)findViewById(R.id.listView_songsByArtist)).setAdapter(artistAdapter);
 
-        HashMap<String, ArrayList<File>> songsByGenre = (HashMap) scanner.getSongsByGenre();
+        HashMap<String, ArrayList<Song>> songsByGenre = (HashMap) scanner.getSongsByGenre();
         String[] genreList = songsByGenre.keySet().toArray(new String[songsByGenre.size()]);
         Arrays.sort(genreList);
         ArrayAdapter<String> genreAdapter = new ArrayAdapter<String>(this,
@@ -59,7 +61,7 @@ public class AddSongActivity extends AppCompatActivity {
         // fix for genre tab
         ((ListView)findViewById(R.id.listView_songsByGenre)).setAdapter(genreAdapter);
 
-        HashMap<String, ArrayList<File>> songsByAlbum = (HashMap) scanner.getSongsByAlbum();
+        HashMap<String, ArrayList<Song>> songsByAlbum = (HashMap) scanner.getSongsByAlbum();
         String[] albumList = songsByAlbum.keySet().toArray(new String[songsByAlbum.size()]);
         Arrays.sort(albumList);
         ArrayAdapter<String> albumAdapter = new ArrayAdapter<String>(this,
@@ -67,18 +69,56 @@ public class AddSongActivity extends AppCompatActivity {
                 albumList);
         ((ListView)findViewById(R.id.listView_songsByAlbum)).setAdapter(albumAdapter);
 
-        // Set list items onclick listener
+        // Set list items onclick listener for Artist
         ((ListView)findViewById(R.id.listView_songsByArtist)).setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String selectedArtist = (String) parent.getItemAtPosition(position);
                 Intent intent = new Intent(getApplicationContext(), SongListActivity.class);
-                intent.putExtra("grouping", MusicScanner.SongGroupings.ALBUM);
+                intent.putExtra("grouping", MusicScanner.SongGroupings.ARTIST.getValue());
                 intent.putExtra("selectedValue", selectedArtist);
-                startActivity(intent);
-
+                startActivityForResult(intent, SONG_SELECT);
             }
         });
+
+        // Set list items onclick listener for Genre
+        ((ListView)findViewById(R.id.listView_songsByGenre)).setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String selectedGenre = (String) parent.getItemAtPosition(position);
+                Intent intent = new Intent(getApplicationContext(), SongListActivity.class);
+                intent.putExtra("grouping", MusicScanner.SongGroupings.GENRE.getValue());
+                intent.putExtra("selectedValue", selectedGenre);
+                startActivityForResult(intent, SONG_SELECT);
+            }
+        });
+
+        // Set list items onclick listener for Album
+        ((ListView)findViewById(R.id.listView_songsByAlbum)).setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String selectedAlbum = (String) parent.getItemAtPosition(position);
+                Intent intent = new Intent(getApplicationContext(), SongListActivity.class);
+                intent.putExtra("grouping", MusicScanner.SongGroupings.ALBUM.getValue());
+                intent.putExtra("selectedValue", selectedAlbum);
+                startActivityForResult(intent, SONG_SELECT);
+            }
+        });
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch(requestCode) {
+            case SONG_SELECT:
+                if (resultCode == Activity.RESULT_OK) {
+                    Intent resultIntent = new Intent();
+                    resultIntent.putExtra("songPath", data.getStringExtra("songPath"));
+                    setResult(Activity.RESULT_OK, resultIntent);
+                    finish();
+                }
+                break;
+        }
     }
 
 }

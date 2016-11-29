@@ -43,6 +43,8 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
             Manifest.permission.WRITE_EXTERNAL_STORAGE
     };
 
+    private final static int SONG_SELECT = 1;
+
     //MusicScanner
     //private ArrayList<Song>     musicFiles;
 
@@ -329,6 +331,21 @@ public class MainActivity extends AppCompatActivity implements SongMetadataFragm
 
     public void menu_addSongs_onClick(MenuItem menuItem) {
         Intent intent = new Intent(getApplicationContext(), AddSongActivity.class);
-        startActivity(intent);
+        startActivityForResult(intent, SONG_SELECT);
     }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch(requestCode) {
+            case SONG_SELECT:
+                if (resultCode == Activity.RESULT_OK) {
+                    String songPath = data.getStringExtra("songPath");
+                    Song selectedSong = SongList.getSongFromPath(songPath);
+                    musicPlayer.playMusic(selectedSong);
+                }
+                break;
+        }
+    }
+
 }
