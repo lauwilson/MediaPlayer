@@ -17,9 +17,9 @@ public class SongCompare {
                 toString().
                 toLowerCase();
 
-        Collections.sort(SongList.SongList, new Comparator<SongList.Song>() {
+        Collections.sort(SongList.SongList, new Comparator<Song>() {
             @Override
-            public int compare(SongList.Song s1, SongList.Song s2){
+            public int compare(Song s1, Song s2){
                 switch (sortBy) {
                     case "artistname":
                         if (sortOrder_mode == 0) {
