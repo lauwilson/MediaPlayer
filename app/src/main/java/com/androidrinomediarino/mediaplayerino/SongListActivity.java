@@ -1,5 +1,6 @@
 package com.androidrinomediarino.mediaplayerino;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -45,10 +46,11 @@ public class SongListActivity extends AppCompatActivity {
         listViewSongs.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Song selectedSong = (Song) parent.getItemAtPosition(position)e
-                if (mListener != null) {
-                    mListener.btn_playlistSongSelect_onClick(selectedSong);
-                }
+                Song selectedSong = (Song) parent.getItemAtPosition(position);
+                Intent resultIntent = new Intent();
+                resultIntent.putExtra("songPath", selectedSong.filePath);
+                setResult(Activity.RESULT_OK, resultIntent);
+                finish();
             }
         });
     }
