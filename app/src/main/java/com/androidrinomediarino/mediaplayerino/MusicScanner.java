@@ -12,9 +12,34 @@ import java.util.HashMap;
 public class MusicScanner {
 
     public enum SongGroupings {
-        ARTIST,
-        GENRE,
-        ALBUM
+        ARTIST(0),
+        GENRE(1),
+        ALBUM(2);
+
+        private final int value;
+
+        SongGroupings(int value) {
+            this.value = value;
+        }
+
+        public int getValue() {
+            return this.value;
+        }
+
+        private static final Map<Integer, SongGroupings> groupingMap = new HashMap<>();
+        static {
+            for (SongGroupings grouping : SongGroupings.values()) {
+                groupingMap.put(grouping.value, grouping);
+            }
+        }
+
+        public static SongGroupings fromInt(int i) {
+            SongGroupings grouping = groupingMap.get(Integer.valueOf(i));
+            if (grouping == null) {
+                throw new IllegalArgumentException();
+            }
+            return grouping;
+        }
     }
 
     private static MusicScanner     instance;

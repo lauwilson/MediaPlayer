@@ -42,7 +42,7 @@ public class AddSongActivity extends AppCompatActivity {
         albumSpec.setIndicator("Album");
         host.addTab(albumSpec);
 
-        HashMap<String, ArrayList<File>> songsByArtist = (HashMap) scanner.getSongsByArtist();
+        HashMap<String, ArrayList<Song>> songsByArtist = (HashMap) scanner.getSongsByArtist();
         String[] artistList = songsByArtist.keySet().toArray(new String[songsByArtist.size()]);
         Arrays.sort(artistList);
         ArrayAdapter<String> artistAdapter = new ArrayAdapter<String>(this,
@@ -50,7 +50,7 @@ public class AddSongActivity extends AppCompatActivity {
                                                                    artistList);
         ((ListView)findViewById(R.id.listView_songsByArtist)).setAdapter(artistAdapter);
 
-        HashMap<String, ArrayList<File>> songsByGenre = (HashMap) scanner.getSongsByGenre();
+        HashMap<String, ArrayList<Song>> songsByGenre = (HashMap) scanner.getSongsByGenre();
         String[] genreList = songsByGenre.keySet().toArray(new String[songsByGenre.size()]);
         Arrays.sort(genreList);
         ArrayAdapter<String> genreAdapter = new ArrayAdapter<String>(this,
@@ -59,7 +59,7 @@ public class AddSongActivity extends AppCompatActivity {
         // fix for genre tab
         ((ListView)findViewById(R.id.listView_songsByGenre)).setAdapter(genreAdapter);
 
-        HashMap<String, ArrayList<File>> songsByAlbum = (HashMap) scanner.getSongsByAlbum();
+        HashMap<String, ArrayList<Song>> songsByAlbum = (HashMap) scanner.getSongsByAlbum();
         String[] albumList = songsByAlbum.keySet().toArray(new String[songsByAlbum.size()]);
         Arrays.sort(albumList);
         ArrayAdapter<String> albumAdapter = new ArrayAdapter<String>(this,
@@ -73,7 +73,7 @@ public class AddSongActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String selectedArtist = (String) parent.getItemAtPosition(position);
                 Intent intent = new Intent(getApplicationContext(), SongListActivity.class);
-                intent.putExtra("grouping", MusicScanner.SongGroupings.ALBUM);
+                intent.putExtra("grouping", MusicScanner.SongGroupings.ARTIST.getValue());
                 intent.putExtra("selectedValue", selectedArtist);
                 startActivity(intent);
 
