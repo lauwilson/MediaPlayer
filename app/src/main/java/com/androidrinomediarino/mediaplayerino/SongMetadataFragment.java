@@ -68,7 +68,7 @@ public class SongMetadataFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_song_metadata, container, false);
-        SongList.Song song = MusicScanner.getInstance().getCurrentSong();
+        Song song = MusicScanner.getInstance().getCurrentSong();
 
         ImageView coverImage = (ImageView) view.findViewById(R.id.imageView);
 

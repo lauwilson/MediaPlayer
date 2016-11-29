@@ -20,6 +20,7 @@ import android.widget.Toast;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class MusicPlayer extends Service implements
         MediaPlayer.OnPreparedListener,
@@ -30,7 +31,7 @@ public class MusicPlayer extends Service implements
     private MediaPlayer         mediaPlayer;
     private String              filePath;
     private int                 cycleCounter = 0;
-    private ArrayList<SongList.Song>     musicList;
+    private List<Song>          musicList;
     private final IBinder       musicBind = new MusicBinder();      // interface for clients that bind
     protected SeekBar           seekBar;
     private int                 duration;
@@ -102,7 +103,7 @@ public class MusicPlayer extends Service implements
         //mediaPlayer.setLooping(true);
     }
 
-    public void setList(ArrayList<SongList.Song> musicList) {
+    public void setList(List<Song> musicList) {
         if(this.musicList == null) {
             this.musicList = musicList;
         }
@@ -140,7 +141,7 @@ public class MusicPlayer extends Service implements
         playMusic(musicList.get(cycleCounter));
     }
 
-    protected final void playMusic(final SongList.Song song) {
+    protected final void playMusic(final Song song) {
         mediaPlayer.reset();
 
         //Play Music
