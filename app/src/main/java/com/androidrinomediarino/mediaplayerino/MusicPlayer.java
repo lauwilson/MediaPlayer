@@ -36,6 +36,7 @@ public class MusicPlayer extends Service implements
     protected SeekBar           seekBar;
     private int                 duration;
     private Toast               toast = null;
+    private boolean             FLAG_IS_PAUSED = false;
 
     @Override
     public void onCreate() {
@@ -118,9 +119,11 @@ public class MusicPlayer extends Service implements
     protected final void playPause(ImageButton playPauseButton) {
         if(mediaPlayer.isPlaying()){
             mediaPlayer.pause();
+            FLAG_IS_PAUSED = true;
             playPauseButton.setImageResource(android.R.drawable.ic_media_play);
         } else {
             mediaPlayer.start();
+            FLAG_IS_PAUSED = false;
             playPauseButton.setImageResource(android.R.drawable.ic_media_pause);
         }
     }
@@ -144,6 +147,14 @@ public class MusicPlayer extends Service implements
     protected final void playMusic(final Song song) {
         mediaPlayer.reset();
 
+        for(int i = 0; i < musicList.size(); i++) {
+            if(musicList.get(i) == song) {
+                Log.d("@MusicPlayer", "Synced musicList with cycleCounter!");
+                cycleCounter = i;
+                break;
+            }
+        }
+
         //Play Music
         try {
             //Initialized State
@@ -164,7 +175,12 @@ public class MusicPlayer extends Service implements
     protected final void startOrContinue() {
         if(mediaPlayer.isPlaying()) {
             // keep playing
-        } else {
+        }
+        else if (FLAG_IS_PAUSED) {
+            mediaPlayer.start();
+            FLAG_IS_PAUSED = false;
+        }
+        else {
             playMusic(musicList.get(0));
         }
     }
